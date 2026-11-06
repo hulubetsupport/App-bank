@@ -116,6 +116,8 @@ export default function App() {
 
   // User profile & Balance (matching user screenshot 9,791.01 ETB)
   const [userName, setUserName] = useState<string>('Aymen Kemal Ali');
+  const [accountName, setAccountName] = useState<string>('Wadiah Ordinary');
+  const [accountNumber, setAccountNumber] = useState<string>('1000562339427');
   const [balance, setBalance] = useState<number>(9791.01);
   const [isBalanceMasked, setIsBalanceMasked] = useState<boolean>(false);
   const [language, setLanguage] = useState<string>('English');
@@ -165,7 +167,7 @@ export default function App() {
   };
 
   const handleCopyAccount = () => {
-    navigator.clipboard?.writeText('1000562339427');
+    navigator.clipboard?.writeText(accountNumber);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -255,6 +257,8 @@ export default function App() {
                 if (screen === 'transactions') setActiveBottomTab('transactions');
               }}
               userName={userName}
+              accountName={accountName}
+              accountNumber={accountNumber}
               language={language}
               onToggleLanguage={handleToggleLanguage}
               onOpenGovernmentServices={() => setIsGovernmentModalOpen(true)}
@@ -276,6 +280,8 @@ export default function App() {
                 setActiveDetailTx(tx);
               }}
               userName={userName}
+              accountName={accountName}
+              accountNumber={accountNumber}
               language={language}
               onToggleLanguage={handleToggleLanguage}
               onCopyAccount={handleCopyAccount}
@@ -290,6 +296,8 @@ export default function App() {
               onInitiateTransfer={handleInitiateTransfer}
               currentBalance={balance}
               userName={userName}
+              accountName={accountName}
+              accountNumber={accountNumber}
               recipientsList={recipientsList}
               onDeleteRecipient={handleDeleteRecipient}
               isProcessingTransfer={isProcessingTransfer}
@@ -300,6 +308,7 @@ export default function App() {
             <ReceiptScreen
               transaction={activeReceiptTx}
               senderName={userName}
+              senderAccount={accountNumber}
               onClose={() => {
                 setCurrentScreen('transactions');
                 setActiveBottomTab('transactions');
@@ -395,6 +404,7 @@ export default function App() {
           recipient={pendingTransfer.recipient}
           amount={pendingTransfer.amount}
           senderName={userName}
+          senderAccount={accountNumber}
         />
       )}
 
@@ -411,8 +421,8 @@ export default function App() {
       <ReceiveModal
         isOpen={isReceiveModalOpen}
         onClose={() => setIsReceiveModalOpen(false)}
-        accountNumber="1000562339427"
-        accountName="Wadiah Ordinary"
+        accountNumber={accountNumber}
+        accountName={accountName}
         userName={userName}
       />
 
@@ -435,7 +445,7 @@ export default function App() {
         }}
       />
 
-      {/* Settings Modal (Name, Balance, Hidden PIN Change, Saved Beneficiaries) */}
+      {/* Settings Modal (Name, Account, Balance, Hidden PIN Change, Saved Beneficiaries) */}
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
@@ -443,6 +453,12 @@ export default function App() {
         onUpdateUserName={(name) => setUserName(name)}
         balance={balance}
         onUpdateBalance={(newBal) => setBalance(newBal)}
+        accountName={accountName}
+        accountNumber={accountNumber}
+        onUpdateAccount={(name, num) => {
+          setAccountName(name);
+          setAccountNumber(num);
+        }}
         language={language}
         onToggleLanguage={handleToggleLanguage}
         onLogout={handleLogout}

@@ -11,6 +11,7 @@ import {
   Check,
   KeyRound,
   Users,
+  Landmark,
 } from 'lucide-react';
 import { Recipient } from '../types/index.ts';
 import { formatETB } from '../utils/banking.ts';
@@ -22,6 +23,9 @@ interface SettingsModalProps {
   onUpdateUserName: (name: string) => void;
   balance: number;
   onUpdateBalance: (balance: number) => void;
+  accountName?: string;
+  accountNumber?: string;
+  onUpdateAccount?: (name: string, num: string) => void;
   language: string;
   onToggleLanguage: () => void;
   onLogout: () => void;
@@ -40,6 +44,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateUserName,
   balance,
   onUpdateBalance,
+  accountName = 'Wadiah Ordinary',
+  accountNumber = '1000562339427',
+  onUpdateAccount,
   language,
   onToggleLanguage,
   onLogout,
@@ -53,6 +60,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   // Editing profile name
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(userName);
+
+  // Editing account number & type
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [accNameInput, setAccNameInput] = useState(accountName);
+  const [accNumInput, setAccNumInput] = useState(accountNumber);
 
   // Editing balance
   const [isEditingBalance, setIsEditingBalance] = useState(false);
@@ -78,6 +90,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (nameInput.trim()) {
       onUpdateUserName(nameInput.trim());
       setIsEditingName(false);
+    }
+  };
+
+  const handleSaveAccount = () => {
+    if (accNumInput.trim() && onUpdateAccount) {
+      onUpdateAccount(accNameInput.trim() || 'Wadiah Ordinary', accNumInput.trim());
+      setIsEditingAccount(false);
     }
   };
 
@@ -202,6 +221,59 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
             ) : (
               <div className="text-sm font-bold text-neutral-900 mt-0.5">{userName}</div>
+            )}
+          </div>
+
+          {/* 2. Account Details & Number (Editable) */}
+          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1">
+                <Landmark className="w-3 h-3 text-[#7C21A4]" />
+                <span>Account Number &amp; Type</span>
+              </span>
+              {!isEditingAccount && (
+                <button
+                  onClick={() => setIsEditingAccount(true)}
+                  className="text-xs font-bold text-[#7C21A4] hover:underline"
+                >
+                  Edit Account
+                </button>
+              )}
+            </div>
+
+            {isEditingAccount ? (
+              <div className="space-y-2 mt-1.5">
+                <input
+                  type="text"
+                  placeholder="Account Type (e.g. Wadiah Ordinary)"
+                  value={accNameInput}
+                  onChange={(e) => setAccNameInput(e.target.value)}
+                  className="w-full h-8 px-3 bg-white border border-neutral-300 rounded-xl outline-none text-xs font-semibold"
+                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Account Number"
+                    value={accNumInput}
+                    onChange={(e) => setAccNumInput(e.target.value)}
+                    className="flex-1 h-8.5 px-3 bg-white border border-neutral-300 rounded-xl outline-none font-semibold font-mono text-xs text-neutral-800"
+                  />
+                  <button
+                    onClick={handleSaveAccount}
+                    className="h-8.5 px-3.5 bg-[#7C21A4] text-white rounded-xl font-bold flex items-center gap-1"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Save</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-0.5">
+                <div className="text-xs text-neutral-500 font-medium">{accountName}</div>
+                <div className="text-sm font-bold text-neutral-900 font-mono tracking-wide">
+                  {accountNumber}
+                </div>
+              </div>
             )}
           </div>
 

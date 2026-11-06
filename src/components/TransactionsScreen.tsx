@@ -11,6 +11,8 @@ interface TransactionsScreenProps {
   transactions: Transaction[];
   onSelectTransaction: (tx: Transaction) => void;
   userName: string;
+  accountName?: string;
+  accountNumber?: string;
   language: string;
   onToggleLanguage: () => void;
   onCopyAccount: () => void;
@@ -25,6 +27,8 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
   transactions,
   onSelectTransaction,
   userName,
+  accountName = 'Wadiah Ordinary',
+  accountNumber = '1000562339427',
   language,
   onToggleLanguage,
   onCopyAccount,
@@ -87,7 +91,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
               className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
               aria-label="Refresh transactions"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4 stroke-[2.2]" />
             </button>
 
             <button
@@ -97,7 +101,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
               } flex items-center justify-center transition`}
               aria-label="Toggle search transactions"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 stroke-[2.2]" />
             </button>
           </div>
         </div>
@@ -108,8 +112,8 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
         balance={balance}
         isMasked={isBalanceMasked}
         onToggleMask={onToggleMask}
-        accountName="Wadiah Ordinary"
-        accountNumber="1000562339427"
+        accountName={accountName}
+        accountNumber={accountNumber}
         lastUpdated="06 Nov 2026 • 10:52 PM"
         onCopyAccount={onCopyAccount}
         copied={copied}

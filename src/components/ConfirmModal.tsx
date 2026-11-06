@@ -1,6 +1,6 @@
 import React from 'react';
 import { Recipient } from '../types/index.ts';
-import { formatETB } from '../utils/banking.ts';
+import { formatETB, maskAccountNumber } from '../utils/banking.ts';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface ConfirmModalProps {
   recipient: Recipient;
   amount: number;
   senderName: string;
+  senderAccount?: string;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -18,6 +19,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   recipient,
   amount,
   senderName,
+  senderAccount = '1000562339427',
 }) => {
   if (!isOpen) return null;
 
@@ -35,7 +37,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <div className="text-right">
               <div className="font-semibold text-neutral-800">{senderName}</div>
               <div className="text-[11px] text-neutral-400 font-mono mt-0.5">
-                1*********9427
+                {maskAccountNumber(senderAccount)}
               </div>
             </div>
           </div>

@@ -19,6 +19,8 @@ interface TransferScreenProps {
   onInitiateTransfer: (recipient: Recipient, amount: number, remark: string) => void;
   currentBalance: number;
   userName: string;
+  accountName?: string;
+  accountNumber?: string;
   recipientsList: Recipient[];
   onDeleteRecipient: (accNumber: string) => void;
   isProcessingTransfer: boolean;
@@ -29,6 +31,8 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
   onInitiateTransfer,
   currentBalance,
   userName,
+  accountName = 'Wadiah Ordinary',
+  accountNumber = '1000562339427',
   recipientsList,
   onDeleteRecipient,
   isProcessingTransfer,
@@ -123,22 +127,29 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
           <div>
             <div className="text-[10.5px] text-neutral-400 font-medium">From Account</div>
             <div className="text-[13px] font-bold mt-0.5 tracking-wide">
-              Wadiah Ordinary 1*********9427
+              {accountName}{' '}
+              <span className="font-mono">
+                {isFromBalanceMasked
+                  ? accountNumber.length > 4
+                    ? `${accountNumber.charAt(0)}*********${accountNumber.slice(-4)}`
+                    : accountNumber
+                  : accountNumber}
+              </span>
             </div>
             {/* Real balance with SVG eye toggle (no emojis!) */}
             <div className="text-[11px] text-neutral-300 mt-1 flex items-center gap-2">
-              <span className="font-mono">
+              <span className="font-mono font-bold">
                 {isFromBalanceMasked ? '••••••' : `${formatETB(currentBalance)} ETB`}
               </span>
               <button
                 onClick={() => setIsFromBalanceMasked(!isFromBalanceMasked)}
                 className="text-neutral-400 hover:text-white p-0.5 transition"
-                aria-label={isFromBalanceMasked ? 'Reveal balance' : 'Hide balance'}
+                aria-label={isFromBalanceMasked ? 'Reveal balance & account' : 'Hide balance & account'}
               >
                 {isFromBalanceMasked ? (
-                  <EyeOff className="w-3.5 h-3.5" />
+                  <EyeOff className="w-3.5 h-3.5 stroke-[2.2]" />
                 ) : (
-                  <Eye className="w-3.5 h-3.5" />
+                  <Eye className="w-3.5 h-3.5 stroke-[2.2]" />
                 )}
               </button>
             </div>

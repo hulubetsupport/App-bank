@@ -13,18 +13,21 @@ import { formatETB, OFFICIAL_CBE_LOGO } from '../utils/banking.ts';
 interface ReceiptScreenProps {
   transaction: Transaction;
   senderName: string;
+  senderAccount?: string;
   onClose: () => void;
 }
 
 export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
   transaction,
   senderName,
+  senderAccount = '1000562339427',
   onClose,
 }) => {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
     `CBE-TX|ID:${transaction.referenceId}|AMT:${transaction.amount}|FOR:${transaction.name}|DATE:${transaction.date}`
   )}`;
 
+  const senderLast4 = senderAccount ? senderAccount.slice(-4) : '9427';
   const shortAcc = transaction.accountNumber
     ? transaction.accountNumber.slice(-4)
     : '6157';
@@ -71,7 +74,7 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
               {formatETB(transaction.amount)}
             </strong>{' '}
             has been debited from{' '}
-            <strong className="text-neutral-900 font-bold">{senderName}</strong> ETB-9427 for{' '}
+            <strong className="text-neutral-900 font-bold">{senderName}</strong> ETB-{senderLast4} for{' '}
             <strong className="text-neutral-900 font-bold">{transaction.name}</strong>{' '}
             <span>ETB-{shortAcc}</span> on{' '}
             <strong className="text-neutral-900 font-bold">{transaction.date}</strong> with

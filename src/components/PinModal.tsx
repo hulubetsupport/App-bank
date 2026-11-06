@@ -48,15 +48,6 @@ export const PinModal: React.FC<PinModalProps> = ({
     setPin((prev) => prev.slice(0, -1));
     setErrorText('');
   };
-
-  const handleQuickPin = () => {
-    setPin(correctPin);
-    setTimeout(() => {
-      setPin('');
-      onSuccess();
-    }, 150);
-  };
-
   return (
     <div className="absolute inset-0 bg-black/60 z-50 flex flex-col justify-end animate-in fade-in duration-200 select-none">
       <div className="bg-white rounded-t-[32px] p-5 pb-6 shadow-2xl animate-in slide-in-from-bottom-10 duration-200">
@@ -69,11 +60,11 @@ export const PinModal: React.FC<PinModalProps> = ({
             onClick={onClose}
             className="absolute right-0 top-0 text-neutral-400 hover:text-neutral-700 p-1"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 stroke-[2.2]" />
           </button>
         </div>
 
-        {/* PIN Dots */}
+        {/* Masked PIN Dots (password is NEVER shown in plain text) */}
         <div className="flex items-center justify-center gap-3.5 my-3">
           {Array.from({ length: pinLength }).map((_, idx) => (
             <span
@@ -90,18 +81,6 @@ export const PinModal: React.FC<PinModalProps> = ({
             {errorText}
           </p>
         )}
-
-        {/* Quick PIN button */}
-        <div className="text-center mb-2.5">
-          <button
-            onClick={handleQuickPin}
-            className="text-[11px] font-semibold text-[#7C21A4] hover:underline"
-          >
-            Confirm PIN ({correctPin})
-          </button>
-        </div>
-
-        {/* Keypad */}
         <div className="grid grid-cols-3 gap-2 max-w-[280px] mx-auto">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
             <button

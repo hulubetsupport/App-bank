@@ -100,7 +100,7 @@ export function createActivityLog(
   };
 }
 
-export const OFFICIAL_CBE_LOGO = '/assets/aistudio/images__10__4493ecca.jpeg';
+export const OFFICIAL_CBE_LOGO = '/assets/aistudio/unnamed_51f31b49.png';
 
 export const INITIAL_RECIPIENTS: Recipient[] = [
   {

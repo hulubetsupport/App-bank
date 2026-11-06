@@ -26,6 +26,8 @@ interface HomeScreenProps {
   onToggleMask: () => void;
   onNavigate: (screen: ScreenType) => void;
   userName: string;
+  accountName?: string;
+  accountNumber?: string;
   language: string;
   onToggleLanguage: () => void;
   onOpenGovernmentServices: () => void;
@@ -42,6 +44,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onToggleMask,
   onNavigate,
   userName,
+  accountName = 'Wadiah Ordinary',
+  accountNumber = '1000562339427',
   language,
   onToggleLanguage,
   onOpenGovernmentServices,
@@ -103,7 +107,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               aria-label="Refresh account"
             >
               <RefreshCw
-                className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
+                className={`w-4 h-4 stroke-[2.2] ${isRefreshing ? 'animate-spin' : ''}`}
               />
             </button>
 
@@ -112,7 +116,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
               aria-label="Search"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 stroke-[2.2]" />
             </button>
           </div>
         </div>
@@ -123,8 +127,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         balance={balance}
         isMasked={isBalanceMasked}
         onToggleMask={onToggleMask}
-        accountName="Wadiah Ordinary"
-        accountNumber="1000562339427"
+        accountName={accountName}
+        accountNumber={accountNumber}
         lastUpdated="06 Nov 2026 • 10:52 PM"
         onCopyAccount={onCopyAccount}
         copied={copied}
@@ -199,7 +203,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 1: CBE Transfer */}
           <button
             onClick={() => onNavigate('transfer')}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[92px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[92px]"
           >
             <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-0.5">
               <ArrowUpRight className="w-4.5 h-4.5 stroke-[2.5]" />
@@ -213,7 +217,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 2: Receive */}
           <button
             onClick={onOpenReceiveModal}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[92px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[92px]"
           >
             <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 mb-0.5">
               <ArrowDownLeft className="w-4.5 h-4.5 stroke-[2.5]" />
@@ -227,10 +231,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 3: Airtime */}
           <button
             onClick={() => onNavigate('transfer')}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[88px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[88px]"
           >
             <div className="w-7 h-7 flex items-center justify-center text-[#7C21A4] mb-0.5">
-              <Phone className="w-5 h-5 fill-current" />
+              <Phone className="w-5 h-5 fill-current stroke-[2.2]" />
             </div>
             <span className="text-[13px] font-bold text-neutral-900">Airtime</span>
           </button>
@@ -238,7 +242,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 4: Other Transfers */}
           <button
             onClick={() => onNavigate('transfer')}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[88px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[88px]"
           >
             <div className="w-7 h-7 flex items-center justify-center text-[#7C21A4] mb-0.5">
               <ArrowLeftRight className="w-5 h-5 stroke-[2.3]" />
@@ -249,10 +253,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 5: CBEBirr */}
           <button
             onClick={() => onNavigate('transfer')}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[88px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[88px]"
           >
             <div className="w-7 h-7 flex items-center justify-center text-[#7C21A4] mb-0.5">
-              <Wallet className="w-5 h-5 fill-current" />
+              <Wallet className="w-5 h-5 fill-current stroke-[2.2]" />
             </div>
             <span className="text-[13px] font-bold text-neutral-900">CBEBirr</span>
           </button>
@@ -260,10 +264,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 6: Bills & Utilities */}
           <button
             onClick={() => onNavigate('transfer')}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[88px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[88px]"
           >
             <div className="w-7 h-7 flex items-center justify-center text-[#7C21A4] mb-0.5">
-              <Receipt className="w-5 h-5" />
+              <Receipt className="w-5 h-5 stroke-[2.2]" />
             </div>
             <span className="text-[13px] font-bold text-neutral-900">Bills &amp; Utilities</span>
           </button>
@@ -271,10 +275,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 7: Banking */}
           <button
             onClick={() => onNavigate('transactions')}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[88px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[88px]"
           >
             <div className="w-7 h-7 flex items-center justify-center text-[#7C21A4] mb-0.5">
-              <Landmark className="w-5 h-5" />
+              <Landmark className="w-5 h-5 stroke-[2.2]" />
             </div>
             <span className="text-[13px] font-bold text-neutral-900">Banking</span>
           </button>
@@ -282,10 +286,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Tile 8: Government Services */}
           <button
             onClick={onOpenGovernmentServices}
-            className="bg-[#EAE6DB] hover:bg-[#e2ddd0] active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-2xs min-h-[88px]"
+            className="bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-2xl p-3.5 flex flex-col items-center text-center justify-center gap-1 shadow-sm border border-neutral-100/80 min-h-[88px]"
           >
             <div className="w-7 h-7 flex items-center justify-center text-[#7C21A4] mb-0.5">
-              <Building2 className="w-5 h-5" />
+              <Building2 className="w-5 h-5 stroke-[2.2]" />
             </div>
             <span className="text-[13px] font-bold text-neutral-900 leading-tight">
               Government Services
