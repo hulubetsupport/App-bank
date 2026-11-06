@@ -1,7 +1,7 @@
-import { Recipient, ActivityLog, NotificationItem } from '../types/index.ts';
+import { Recipient, ActivityLog } from '../types/index.ts';
 
 /**
- * Real password specified by user is "0607".
+ * Real password specified by user is "0607" (supports 4 or 6 digits, configurable in Settings).
  */
 export const DEFAULT_AUTH_PIN = '0607';
 
@@ -37,7 +37,6 @@ export function searchRecipients(query: string, recipients: Recipient[]): Recipi
 }
 
 export function calculateCharges(amount: number) {
-  // Mobile Banking CBE transfer charges
   const serviceCharge = 0.0;
   const vat = 0.0;
   const disasterRecovery = 0.0;
@@ -54,10 +53,19 @@ export function calculateCharges(amount: number) {
 export function generateTransactionId(): string {
   const chars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let randomPart = '';
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 8; i++) {
     randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return `FT26${randomPart}`;
+  return `FT26311${randomPart.slice(0, 5)}`;
+}
+
+export function generateReceiptId(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let res = 'v2-';
+  for (let i = 0; i < 20; i++) {
+    res += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return res;
 }
 
 export function createActivityLog(
@@ -86,49 +94,50 @@ export function createActivityLog(
     action,
     category,
     details,
-    ipAddress: '197.156.103.42', // Ethio Telecom / Addis Ababa gateway
+    ipAddress: '197.156.103.42',
     device: 'Redmi Note 11 (Android 14) • CBE App v5.2.1',
     status,
   };
 }
 
-export function createPushNotification(
-  title: string,
-  message: string,
-  type: NotificationItem['type'] = 'TRANSACTION',
-  amount?: number
-): NotificationItem {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-
-  return {
-    id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-    title,
-    message,
-    timestamp: timeStr,
-    timeMs: now.getTime(),
-    read: false,
-    type,
-    amount,
-  };
-}
+export const OFFICIAL_CBE_LOGO = '/assets/aistudio/images__10__4493ecca.jpeg';
 
 export const INITIAL_RECIPIENTS: Recipient[] = [
   {
-    name: 'Tsegaye Abebe Berihun',
-    accountNumber: '1000293817314',
-    masked: '1*********7314',
-    initials: 'TA',
+    name: 'Sara Endris Ali',
+    accountNumber: '1000293813474',
+    masked: '1*********3474',
+    initials: 'SE',
   },
   {
-    name: 'Sofiya Seid Yesuf',
-    accountNumber: '1000392819143',
-    masked: '1*********9143',
-    initials: 'SS',
+    name: 'Aminat Hassen Mohammed',
+    accountNumber: '1000782917997',
+    masked: '1*********7997',
+    initials: 'AH',
+  },
+  {
+    name: 'Habib Yimam Ahmed',
+    accountNumber: '1000192810164',
+    masked: '1*********0164',
+    initials: 'HY',
+  },
+  {
+    name: 'Yisak Hailu Desalegn',
+    accountNumber: '1000293810588',
+    masked: '1*********0588',
+    initials: 'YH',
+  },
+  {
+    name: 'Henok Dessie Assefa',
+    accountNumber: '1000392813114',
+    masked: '1*********3114',
+    initials: 'HD',
+  },
+  {
+    name: 'Desalegn Sitotaw Embiyalew',
+    accountNumber: '1000492815123',
+    masked: '1*********5123',
+    initials: 'DS',
   },
   {
     name: 'Bilal Seid Abdu',
@@ -137,51 +146,33 @@ export const INITIAL_RECIPIENTS: Recipient[] = [
     initials: 'BA',
   },
   {
-    name: 'Abdu Mohammed',
-    accountNumber: '1000592813321',
-    masked: '1*********3321',
+    name: 'Abdu Mohammed Yimer',
+    accountNumber: '1000639261186',
+    masked: '1*********1186',
     initials: 'AM',
   },
   {
-    name: 'Aminat Mohammed',
-    accountNumber: '1000782910012',
-    masked: '1*********0012',
-    initials: 'AM',
+    name: 'Tsegaye Abebe Berihun',
+    accountNumber: '1000066327314',
+    masked: '1*********7314',
+    initials: 'TA',
   },
   {
-    name: 'Momina Mekuriyaw Adem',
-    accountNumber: '1000482914708',
-    masked: '1*********4708',
-    initials: 'MM',
+    name: 'Sualih Hussen Mohammed',
+    accountNumber: '1000134189677',
+    masked: '1*********9677',
+    initials: 'SM',
   },
   {
-    name: 'Sara Endris Ali',
-    accountNumber: '1000293813474',
-    masked: '1*********3474',
-    initials: 'SE',
+    name: 'Deguale Shmels Amare',
+    accountNumber: '1000723915434',
+    masked: '1*********5434',
+    initials: 'DS',
   },
   {
-    name: 'Nuru Ebrahim Ali',
-    accountNumber: '1000192811159',
-    masked: '1*********1159',
-    initials: 'NE',
-  },
-  {
-    name: 'Mohammed Esmael Mussa',
-    accountNumber: '1000294816605',
-    masked: '1*********6605',
-    initials: 'ME',
-  },
-  {
-    name: 'Fuad Aragaw Hassen',
-    accountNumber: '1000192815952',
-    masked: '1*********5952',
-    initials: 'FA',
-  },
-  {
-    name: 'Vip Lounge Viplounge',
-    accountNumber: '1000626523475',
-    masked: '1*********3475',
-    initials: 'VL',
+    name: 'Nebiyu Mohammed Ahmed',
+    accountNumber: '1000415518599',
+    masked: '1*********8599',
+    initials: 'NM',
   },
 ];

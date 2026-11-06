@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
-import {
-  RefreshCw,
-  Search,
-  ArrowUpRight,
-  ArrowDownLeft,
-  X,
-  FileDown,
-} from 'lucide-react';
+import { RefreshCw, Search, ArrowUpRight, ArrowDownLeft, X } from 'lucide-react';
 import { BankCard } from './BankCard.tsx';
 import { Transaction, TxType } from '../types/index.ts';
 import { formatETB } from '../utils/banking.ts';
-import { playChime } from '../utils/audio.ts';
 
 interface TransactionsScreenProps {
   balance: number;
@@ -19,11 +11,11 @@ interface TransactionsScreenProps {
   transactions: Transaction[];
   onSelectTransaction: (tx: Transaction) => void;
   userName: string;
-  onSwitchUser: () => void;
   language: string;
   onToggleLanguage: () => void;
   onCopyAccount: () => void;
   copied: boolean;
+  onOpenSettings: () => void;
 }
 
 export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
@@ -33,11 +25,11 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
   transactions,
   onSelectTransaction,
   userName,
-  onSwitchUser,
   language,
   onToggleLanguage,
   onCopyAccount,
   copied,
+  onOpenSettings,
 }) => {
   const [filter, setFilter] = useState<'all' | TxType>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -58,12 +50,12 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
   });
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#F5F3EC]">
+    <div className="flex-1 flex flex-col overflow-hidden bg-[#F5F3EC] select-none">
       {/* Header */}
-      <div className="bg-[#7C21A4] px-4.5 pt-3 pb-3 text-white shrink-0">
+      <div className="bg-[#7C21A4] px-4.5 pt-2 pb-3 text-white shrink-0">
         <div className="flex items-center justify-between">
           <div
-            onClick={onSwitchUser}
+            onClick={onOpenSettings}
             className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition"
           >
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
@@ -76,8 +68,8 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
             </div>
             <div>
               <div className="text-[10.5px] text-purple-200 leading-none">Hello,</div>
-              <div className="text-[15px] font-bold tracking-tight leading-tight">
-                {userName}
+              <div className="text-[15px] font-bold tracking-tight leading-tight mt-0.5">
+                {userName.split(' ')[0]}
               </div>
             </div>
           </div>
@@ -92,7 +84,6 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
             </button>
 
             <button
-              onClick={() => playChime('tap')}
               className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
               aria-label="Refresh transactions"
             >
@@ -119,7 +110,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
         onToggleMask={onToggleMask}
         accountName="Wadiah Ordinary"
         accountNumber="1000562339427"
-        lastUpdated="05 Nov 2026 • 05:22 PM"
+        lastUpdated="06 Nov 2026 • 10:52 PM"
         onCopyAccount={onCopyAccount}
         copied={copied}
       />
@@ -132,10 +123,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
         <div className="flex items-center justify-between border-b border-[#ded9cc] pb-2 mb-3">
           <div className="flex items-center gap-6 text-[13px] font-bold">
             <button
-              onClick={() => {
-                setFilter('all');
-                playChime('tap');
-              }}
+              onClick={() => setFilter('all')}
               className={`relative pb-1.5 transition ${
                 filter === 'all' ? 'text-neutral-900' : 'text-neutral-400'
               }`}
@@ -147,10 +135,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
             </button>
 
             <button
-              onClick={() => {
-                setFilter('debited');
-                playChime('tap');
-              }}
+              onClick={() => setFilter('debited')}
               className={`relative pb-1.5 transition ${
                 filter === 'debited' ? 'text-neutral-900' : 'text-neutral-400'
               }`}
@@ -162,10 +147,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
             </button>
 
             <button
-              onClick={() => {
-                setFilter('credited');
-                playChime('tap');
-              }}
+              onClick={() => setFilter('credited')}
               className={`relative pb-1.5 transition ${
                 filter === 'credited' ? 'text-neutral-900' : 'text-neutral-400'
               }`}
@@ -188,7 +170,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
 
         {/* Search Input Bar if opened */}
         {isSearchOpen && (
-          <div className="mb-3 flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-neutral-300 shadow-xs animate-in fade-in">
+          <div className="mb-3 flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-neutral-300 shadow-2xs animate-in fade-in">
             <Search className="w-4 h-4 text-neutral-400 shrink-0" />
             <input
               type="text"
@@ -214,7 +196,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
               <div
                 key={tx.id}
                 onClick={() => onSelectTransaction(tx)}
-                className="bg-white rounded-2xl p-3 flex items-center justify-between shadow-xs hover:shadow-md transition cursor-pointer active:scale-[0.99] border border-neutral-100"
+                className="bg-white rounded-2xl p-3 flex items-center justify-between shadow-2xs hover:shadow-xs transition cursor-pointer active:scale-[0.99] border border-neutral-100"
               >
                 <div className="flex items-center gap-3">
                   <div

@@ -1,39 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   ScreenType,
   Transaction,
   Recipient,
-  ActivityLog,
-  NotificationItem,
 } from './types/index.ts';
 import {
-  formatETB,
-  createActivityLog,
-  createPushNotification,
   generateTransactionId,
+  generateReceiptId,
   INITIAL_RECIPIENTS,
   DEFAULT_AUTH_PIN,
 } from './utils/banking.ts';
-import { playChime } from './utils/audio.ts';
 import { PhoneFrame } from './components/PhoneFrame.tsx';
 import { LoginScreen } from './components/LoginScreen.tsx';
 import { HomeScreen } from './components/HomeScreen.tsx';
 import { TransactionsScreen } from './components/TransactionsScreen.tsx';
 import { TransferScreen } from './components/TransferScreen.tsx';
 import { ReceiptScreen } from './components/ReceiptScreen.tsx';
+import { TransactionDetailModal } from './components/TransactionDetailModal.tsx';
 import { ConfirmModal } from './components/ConfirmModal.tsx';
 import { PinModal } from './components/PinModal.tsx';
 import { GovernmentServicesModal } from './components/GovernmentServicesModal.tsx';
-import { PushNotificationBanner } from './components/PushNotificationBanner.tsx';
-import { NotificationCenterDrawer } from './components/NotificationCenterDrawer.tsx';
-import { ActivityLogDrawer } from './components/ActivityLogDrawer.tsx';
-import { GithubCiModal } from './components/GithubCiModal.tsx';
 import { SettingsModal } from './components/SettingsModal.tsx';
 import { ReceiveModal } from './components/ReceiveModal.tsx';
 import { ScanQrModal } from './components/ScanQrModal.tsx';
-import { Home, Landmark, Settings, Check } from 'lucide-react';
+import { Home, Landmark, Settings } from 'lucide-react';
 
 const INITIAL_TRANSACTIONS: Transaction[] = [
+  {
+    id: 'tx_bilal',
+    name: 'Bilal Seid',
+    date: '06-Nov-26 10:54 PM',
+    timestamp: Date.now() - 120000,
+    amount: 5.0,
+    type: 'debited',
+    category: 'ACCOUNT TO ACCOUNT',
+    referenceId: 'FT26311KH4GH',
+    receiptId: 'v2-hfHCxNVvrTgUZ3k1kOTg',
+    accountNumber: '1000382106157',
+    remark: 'MB Transfer',
+  },
   {
     id: 'tx_1',
     name: 'Sofiya Seid',
@@ -43,6 +48,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     type: 'credited',
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26309HZ114',
+    receiptId: 'v2-a9KlxNVvrTgUZ3k8mOPq',
     accountNumber: '1000392819143',
     remark: 'MB transfer',
   },
@@ -55,7 +61,8 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     type: 'debited',
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26309HZ9G2',
-    accountNumber: '1000293817314',
+    receiptId: 'v2-z7PqxNVvrTgUZ3k2bXZr',
+    accountNumber: '1000066327314',
     remark: 'MB transfer',
   },
   {
@@ -67,7 +74,8 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     type: 'debited',
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26309HZ882',
-    accountNumber: '1000592813321',
+    receiptId: 'v2-m4YtxNVvrTgUZ3k9cLMk',
+    accountNumber: '1000639261186',
     remark: 'MB transfer',
   },
   {
@@ -79,6 +87,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     type: 'debited',
     category: 'TOP-UP (AIRTIME & DATA RECHARGE)',
     referenceId: 'FT26308HZ721',
+    receiptId: 'v2-t2RvxNVvrTgUZ3k4eQWs',
     remark: 'Airtime Recharge',
   },
   {
@@ -90,50 +99,13 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     type: 'credited',
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26308HZ643',
-    accountNumber: '1000782910012',
+    receiptId: 'v2-w8UyxNVvrTgUZ3k6fJKu',
+    accountNumber: '1000782917997',
     remark: 'Family Support',
   },
-  {
-    id: 'tx_6',
-    name: 'Bilal Seid',
-    date: '04-Nov-26 3:20 PM',
-    timestamp: Date.now() - 95000000,
-    amount: 400.0,
-    type: 'debited',
-    category: 'ACCOUNT TO ACCOUNT',
-    referenceId: 'FT26308HZ510',
-    accountNumber: '1000382106157',
-    remark: 'MB transfer',
-  },
-];
-
-const INITIAL_LOGS: ActivityLog[] = [
-  createActivityLog('SESSION_INITIALIZED', 'SYSTEM', 'CBE Mobile Application loaded securely'),
-  createActivityLog('SECURITY_CHECK', 'SECURITY', 'Device integrity and TLS 1.3 encryption verified'),
-  createActivityLog(
-    'PREVIOUS_SESSION_LOGIN',
-    'AUTH',
-    'Previous login verified via credential PIN 0607 on Redmi Note 11'
-  ),
-];
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  createPushNotification(
-    'CBE Credit Alert',
-    'ETB 5,000.00 credited to Wadiah Ordinary 1000562339427 from Sofiya Seid Yesuf.',
-    'TRANSACTION',
-    5000
-  ),
-  createPushNotification(
-    'CBE Debit Alert',
-    'ETB 850.00 debited from Wadiah Ordinary 1000562339427 for Tsegaye Abebe Berihun.',
-    'TRANSACTION',
-    -850
-  ),
 ];
 
 export default function App() {
-  // Check for Ultra Mode autostart
   const isAutostart =
     typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).get('autostart') === '1';
@@ -141,307 +113,156 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(isAutostart);
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
   const [activeBottomTab, setActiveBottomTab] = useState<'home' | 'transactions' | 'settings'>('home');
-  const [balance, setBalance] = useState<number>(15683.01);
+
+  // User profile & Balance (matching user screenshot 9,791.01 ETB)
+  const [userName, setUserName] = useState<string>('Aymen Kemal Ali');
+  const [balance, setBalance] = useState<number>(9791.01);
   const [isBalanceMasked, setIsBalanceMasked] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>('Aymen');
   const [language, setLanguage] = useState<string>('English');
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Data lists
-  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(INITIAL_LOGS);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  // Security PIN (default 0607, supports 4 or 6 digits)
+  const [currentPin, setCurrentPin] = useState<string>(DEFAULT_AUTH_PIN);
+  const [pinLength, setPinLength] = useState<number>(4);
 
-  // Transfer flow states
+  // Beneficiaries & Transactions
+  const [recipientsList, setRecipientsList] = useState<Recipient[]>(INITIAL_RECIPIENTS);
+  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+
+  // Transfer flow
   const [pendingTransfer, setPendingTransfer] = useState<{
     recipient: Recipient;
     amount: number;
     remark: string;
   } | null>(null);
+  const [isProcessingTransfer, setIsProcessingTransfer] = useState<boolean>(false);
   const [activeReceiptTx, setActiveReceiptTx] = useState<Transaction | null>(null);
+  const [activeDetailTx, setActiveDetailTx] = useState<Transaction | null>(null);
 
-  // Modals & Drawers
+  // Modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
   const [isScanQrModalOpen, setIsScanQrModalOpen] = useState(false);
   const [isGovernmentModalOpen, setIsGovernmentModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [isActivityLogsOpen, setIsActivityLogsOpen] = useState(false);
-  const [isNotificationsDrawerOpen, setIsNotificationsDrawerOpen] = useState(false);
-  const [isCiCdModalOpen, setIsCiCdModalOpen] = useState(false);
 
-  // Live Toast & Push Banner
-  const [activePush, setActivePush] = useState<NotificationItem | null>(null);
-  const [toastNotice, setToastNotice] = useState<string | null>(null);
-
-  // Show a momentary toast
-  const showToast = (msg: string) => {
-    setToastNotice(msg);
-    setTimeout(() => {
-      setToastNotice((curr) => (curr === msg ? null : curr));
-    }, 2200);
-  };
-
-  // Add an activity log
-  const logEvent = (
-    action: string,
-    category: ActivityLog['category'],
-    details: string,
-    status: ActivityLog['status'] = 'SUCCESS'
-  ) => {
-    const entry = createActivityLog(action, category, details, status);
-    setActivityLogs((prev) => [entry, ...prev]);
-  };
-
-  // Trigger push alert
-  const triggerPushAlert = (
-    title: string,
-    message: string,
-    type: NotificationItem['type'] = 'TRANSACTION',
-    amount?: number
-  ) => {
-    playChime('notification');
-    const notif = createPushNotification(title, message, type, amount);
-    setNotifications((prev) => [notif, ...prev]);
-    setActivePush(notif);
-
-    // Also attempt browser push if granted
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'granted') {
-        try {
-          new Notification(title, {
-            body: message,
-            icon: 'https://i.postimg.cc/Hk1pN2VS/20260805-174301.png',
-          });
-        } catch {
-          // ignore
-        }
-      }
-    }
-  };
-
-  // Authentication
-  const handleLoginSuccess = (method: 'PIN' | 'BIOMETRIC') => {
+  // Handlers
+  const handleLoginSuccess = () => {
     setIsAuthenticated(true);
     setCurrentScreen('home');
     setActiveBottomTab('home');
-    logEvent(
-      'AUTH_LOGIN_SUCCESS',
-      'AUTH',
-      `User ${userName} logged in successfully via ${method} (PIN 0607)`
-    );
-    triggerPushAlert(
-      'Login Notification',
-      `Welcome to CBE Mobile Banking. Session authenticated via ${method}.`,
-      'SECURITY'
-    );
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setIsSettingsModalOpen(false);
     setCurrentScreen('login');
-    logEvent('AUTH_LOGOUT', 'AUTH', `User ${userName} signed out and locked the app`);
-    showToast('Signed out successfully');
-  };
-
-  const handleSwitchUser = () => {
-    const nextUser = userName === 'Aymen' ? 'Abdurahman' : 'Aymen';
-    setUserName(nextUser);
-    logEvent('PROFILE_SWITCH', 'SETTINGS', `Active profile switched to ${nextUser}`);
-    showToast(`Switched user profile to ${nextUser}`);
   };
 
   const handleToggleLanguage = () => {
-    const nextLang = language === 'English' ? 'አማርኛ' : 'English';
-    setLanguage(nextLang);
-    logEvent('LANGUAGE_CHANGED', 'SETTINGS', `Interface language updated to ${nextLang}`);
-    showToast(`Language set to ${nextLang}`);
+    setLanguage((prev) => (prev === 'English' ? 'አማርኛ' : 'English'));
   };
 
   const handleCopyAccount = () => {
     navigator.clipboard?.writeText('1000562339427');
     setCopied(true);
-    playChime('tap');
-    showToast('Account copied: 1000562339427');
-    logEvent('ACCOUNT_NUMBER_COPIED', 'SECURITY', 'Account number 1000562339427 copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Transfer Initiation
+  // Transfer Step 1: user clicks Continue on Transfer screen -> opens Confirm modal
   const handleInitiateTransfer = (recipient: Recipient, amount: number, remark: string) => {
     setPendingTransfer({ recipient, amount, remark });
     setIsConfirmModalOpen(true);
-    logEvent(
-      'TRANSFER_INITIATED',
-      'TRANSACTION',
-      `Transfer draft of ETB ${formatETB(amount)} to ${recipient.name} (${recipient.accountNumber})`
-    );
   };
 
+  // Transfer Step 2: user clicks Continue on Confirm modal -> opens PIN modal
   const handleConfirmTransfer = () => {
     setIsConfirmModalOpen(false);
     setIsPinModalOpen(true);
   };
 
-  // Transfer Execution
+  // Transfer Step 3: PIN is confirmed -> show 360° purple rotating circle loader for 1.8s, then open receipt!
   const handleExecuteTransfer = () => {
     setIsPinModalOpen(false);
     if (!pendingTransfer) return;
 
-    const { recipient, amount, remark } = pendingTransfer;
-    const txId = generateTransactionId();
+    setIsProcessingTransfer(true);
 
-    const now = new Date();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const dateFormatted = `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${String(
-      now.getFullYear()
-    ).slice(-2)} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    setTimeout(() => {
+      setIsProcessingTransfer(false);
 
-    const newTx: Transaction = {
-      id: 'tx_' + Date.now(),
-      name: recipient.name,
-      date: dateFormatted,
-      timestamp: Date.now(),
-      amount,
-      type: 'debited',
-      category: 'ACCOUNT TO ACCOUNT',
-      referenceId: txId,
-      accountNumber: recipient.accountNumber,
-      remark: remark || 'MB transfer',
-    };
+      const { recipient, amount, remark } = pendingTransfer;
+      const txId = generateTransactionId();
+      const rcptId = generateReceiptId();
 
-    // Deduct balance
-    const updatedBalance = balance - amount;
-    setBalance(updatedBalance);
-    setTransactions((prev) => [newTx, ...prev]);
-    setActiveReceiptTx(newTx);
-    setCurrentScreen('receipt');
+      const now = new Date();
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const dateFormatted = `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${String(
+        now.getFullYear()
+      ).slice(-2)} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 
-    // Audit Log
-    logEvent(
-      'TRANSFER_COMPLETED',
-      'TRANSACTION',
-      `Debited ETB ${formatETB(amount)} for ${recipient.name} (${recipient.accountNumber}). Ref: ${txId}`,
-      'SUCCESS'
-    );
+      const newTx: Transaction = {
+        id: 'tx_' + Date.now(),
+        name: recipient.name,
+        date: dateFormatted,
+        timestamp: Date.now(),
+        amount,
+        type: 'debited',
+        category: 'ACCOUNT TO ACCOUNT',
+        referenceId: txId,
+        receiptId: rcptId,
+        accountNumber: recipient.accountNumber,
+        remark: remark || 'MB Transfer',
+      };
 
-    // Trigger Push Notification
-    triggerPushAlert(
-      'CBE Debit Alert',
-      `ETB ${formatETB(amount)} debited from Wadiah Ordinary 1000562339427 for ${recipient.name} on ${dateFormatted}. Ref: ${txId}`,
-      'TRANSACTION',
-      -amount
-    );
+      setBalance((prev) => prev - amount);
+      setTransactions((prev) => [newTx, ...prev]);
+      setActiveReceiptTx(newTx);
+      setCurrentScreen('receipt');
+    }, 1800);
   };
 
-  // Simulate Incoming Transfer for Instant Push Testing
-  const handleSimulateIncomingMoney = () => {
-    const incomingAmt = 1500.0;
-    const newBal = balance + incomingAmt;
-    setBalance(newBal);
-
-    const now = new Date();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const dateFormatted = `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${String(
-      now.getFullYear()
-    ).slice(-2)} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-
-    const txId = generateTransactionId();
-    const creditTx: Transaction = {
-      id: 'tx_inc_' + Date.now(),
-      name: 'Bilal Seid Abdu',
-      date: dateFormatted,
-      timestamp: Date.now(),
-      amount: incomingAmt,
-      type: 'credited',
-      category: 'ACCOUNT TO ACCOUNT',
-      referenceId: txId,
-      accountNumber: '1000382106157',
-      remark: 'Project payment',
-    };
-
-    setTransactions((prev) => [creditTx, ...prev]);
-
-    logEvent(
-      'INCOMING_TRANSFER_CREDITED',
-      'TRANSACTION',
-      `Credited ETB ${formatETB(incomingAmt)} from Bilal Seid Abdu (1000382106157). Ref: ${txId}`,
-      'SUCCESS'
-    );
-
-    triggerPushAlert(
-      'CBE Credit Alert',
-      `ETB ${formatETB(incomingAmt)} credited to Wadiah Ordinary 1000562339427 from Bilal Seid Abdu. Ref: ${txId}`,
-      'TRANSACTION',
-      incomingAmt
-    );
-
-    showToast(`Received ETB ${formatETB(incomingAmt)} from Bilal Seid Abdu`);
+  // Adding and deleting beneficiaries from settings
+  const handleAddRecipient = (rec: Recipient) => {
+    setRecipientsList((prev) => [rec, ...prev]);
   };
 
-  // PWA install trigger
-  const handleInstallPwa = () => {
-    showToast('App ready! Add to Home Screen via your browser menu for standalone mode.');
+  const handleDeleteRecipient = (accNumber: string) => {
+    setRecipientsList((prev) => prev.filter((r) => r.accountNumber !== accNumber));
   };
-
-  const unreadNotifsCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <PhoneFrame
-      activeScreen={currentScreen}
-      unreadNotifsCount={unreadNotifsCount}
-      onOpenNotifications={() => setIsNotificationsDrawerOpen(true)}
-      onOpenActivityLogs={() => setIsActivityLogsOpen(true)}
-      onOpenCiCd={() => setIsCiCdModalOpen(true)}
-    >
-      {/* Real-time Top Push Notification Banner */}
-      <PushNotificationBanner
-        notification={activePush}
-        onDismiss={() => setActivePush(null)}
-        onOpenDetails={(notif) => {
-          setActivePush(null);
-          setIsNotificationsDrawerOpen(true);
-        }}
-      />
-
-      {/* Screen Routing */}
+    <PhoneFrame activeScreen={currentScreen}>
+      {/* Screen Router */}
       {!isAuthenticated ? (
         <LoginScreen
           onLoginSuccess={handleLoginSuccess}
-          onOpenNotifications={() => setIsNotificationsDrawerOpen(true)}
           language={language}
           onToggleLanguage={handleToggleLanguage}
+          correctPin={currentPin}
+          pinLength={pinLength}
         />
       ) : (
-        <div className="flex-1 flex flex-col relative overflow-hidden">
+        <div className="flex-1 flex flex-col relative overflow-hidden select-none">
           {currentScreen === 'home' && (
             <HomeScreen
               balance={balance}
               isBalanceMasked={isBalanceMasked}
-              onToggleMask={() => {
-                setIsBalanceMasked(!isBalanceMasked);
-                logEvent(
-                  'BALANCE_VISIBILITY_TOGGLED',
-                  'SECURITY',
-                  isBalanceMasked ? 'Balance unmasked' : 'Balance masked'
-                );
-              }}
+              onToggleMask={() => setIsBalanceMasked(!isBalanceMasked)}
               onNavigate={(screen) => {
                 setCurrentScreen(screen);
                 if (screen === 'transactions') setActiveBottomTab('transactions');
               }}
               userName={userName}
-              onSwitchUser={handleSwitchUser}
               language={language}
               onToggleLanguage={handleToggleLanguage}
               onOpenGovernmentServices={() => setIsGovernmentModalOpen(true)}
-              onQuickActionNotice={showToast}
               onOpenReceiveModal={() => setIsReceiveModalOpen(true)}
               onOpenScanQr={() => setIsScanQrModalOpen(true)}
               copied={copied}
               onCopyAccount={handleCopyAccount}
+              onOpenSettings={() => setIsSettingsModalOpen(true)}
             />
           )}
 
@@ -452,15 +273,14 @@ export default function App() {
               onToggleMask={() => setIsBalanceMasked(!isBalanceMasked)}
               transactions={transactions}
               onSelectTransaction={(tx) => {
-                setActiveReceiptTx(tx);
-                setCurrentScreen('receipt');
+                setActiveDetailTx(tx);
               }}
               userName={userName}
-              onSwitchUser={handleSwitchUser}
               language={language}
               onToggleLanguage={handleToggleLanguage}
               onCopyAccount={handleCopyAccount}
               copied={copied}
+              onOpenSettings={() => setIsSettingsModalOpen(true)}
             />
           )}
 
@@ -470,18 +290,20 @@ export default function App() {
               onInitiateTransfer={handleInitiateTransfer}
               currentBalance={balance}
               userName={userName}
+              recipientsList={recipientsList}
+              onDeleteRecipient={handleDeleteRecipient}
+              isProcessingTransfer={isProcessingTransfer}
             />
           )}
 
           {currentScreen === 'receipt' && activeReceiptTx && (
             <ReceiptScreen
               transaction={activeReceiptTx}
-              senderName={userName === 'Aymen' ? 'Aymen Kemal Ali' : 'Abdurahman'}
-              onDone={() => {
+              senderName={userName}
+              onClose={() => {
                 setCurrentScreen('transactions');
                 setActiveBottomTab('transactions');
               }}
-              onShareNotice={showToast}
             />
           )}
 
@@ -552,7 +374,19 @@ export default function App() {
         </div>
       )}
 
-      {/* Confirmation Bottom Sheet */}
+      {/* Transaction Detail Bottom Sheet (IMG_20261106_230128_152_4cbf5aa2.jpg) */}
+      <TransactionDetailModal
+        isOpen={Boolean(activeDetailTx)}
+        onClose={() => setActiveDetailTx(null)}
+        transaction={activeDetailTx}
+        onViewReceipt={(tx) => {
+          setActiveReceiptTx(tx);
+          setActiveDetailTx(null);
+          setCurrentScreen('receipt');
+        }}
+      />
+
+      {/* Confirmation Bottom Sheet (IMG_20261106_230128_091_80078464.jpg) */}
       {pendingTransfer && (
         <ConfirmModal
           isOpen={isConfirmModalOpen}
@@ -560,15 +394,17 @@ export default function App() {
           onConfirm={handleConfirmTransfer}
           recipient={pendingTransfer.recipient}
           amount={pendingTransfer.amount}
-          senderName={userName === 'Aymen' ? 'Aymen Kemal Ali' : 'Abdurahman'}
+          senderName={userName}
         />
       )}
 
-      {/* 6-PIN Bottom Sheet */}
+      {/* PIN Keypad Modal */}
       <PinModal
         isOpen={isPinModalOpen}
         onClose={() => setIsPinModalOpen(false)}
         onSuccess={handleExecuteTransfer}
+        correctPin={currentPin}
+        pinLength={pinLength}
       />
 
       {/* Receive Money QR Modal */}
@@ -577,7 +413,7 @@ export default function App() {
         onClose={() => setIsReceiveModalOpen(false)}
         accountNumber="1000562339427"
         accountName="Wadiah Ordinary"
-        userName={userName === 'Aymen' ? 'Aymen Kemal Ali' : 'Abdurahman'}
+        userName={userName}
       />
 
       {/* Scan QR Modal */}
@@ -587,7 +423,6 @@ export default function App() {
         onScanSuccess={(recipient) => {
           setIsScanQrModalOpen(false);
           setCurrentScreen('transfer');
-          showToast(`QR Code scanned: ${recipient.name}`);
         }}
       />
 
@@ -595,61 +430,32 @@ export default function App() {
       <GovernmentServicesModal
         isOpen={isGovernmentModalOpen}
         onClose={() => setIsGovernmentModalOpen(false)}
-        onSelectService={(name) => {
+        onSelectService={() => {
           setIsGovernmentModalOpen(false);
-          showToast(`Opened ${name} Portal`);
-          logEvent('GOV_SERVICE_OPENED', 'SYSTEM', `User accessed ${name}`);
         }}
       />
 
-      {/* Notification Center Drawer */}
-      <NotificationCenterDrawer
-        isOpen={isNotificationsDrawerOpen}
-        onClose={() => setIsNotificationsDrawerOpen(false)}
-        notifications={notifications}
-        onMarkAllAsRead={() => {
-          setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-          showToast('Marked all notifications as read');
-        }}
-        onSimulateIncoming={handleSimulateIncomingMoney}
-      />
-
-      {/* Detailed Activity Tracking Drawer */}
-      <ActivityLogDrawer
-        isOpen={isActivityLogsOpen}
-        onClose={() => setIsActivityLogsOpen(false)}
-        logs={activityLogs}
-      />
-
-      {/* GitHub CI/CD & App Distribution Modal */}
-      <GithubCiModal
-        isOpen={isCiCdModalOpen}
-        onClose={() => setIsCiCdModalOpen(false)}
-        onInstallPwa={handleInstallPwa}
-        isInstallable={true}
-      />
-
-      {/* Settings Modal */}
+      {/* Settings Modal (Name, Balance, Hidden PIN Change, Saved Beneficiaries) */}
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         userName={userName}
-        onSwitchUser={handleSwitchUser}
+        onUpdateUserName={(name) => setUserName(name)}
+        balance={balance}
+        onUpdateBalance={(newBal) => setBalance(newBal)}
         language={language}
         onToggleLanguage={handleToggleLanguage}
         onLogout={handleLogout}
-        onOpenCiCd={() => setIsCiCdModalOpen(true)}
-        onOpenActivityLogs={() => setIsActivityLogsOpen(true)}
-        onOpenNotifications={() => setIsNotificationsDrawerOpen(true)}
-        onNotice={showToast}
+        correctPin={currentPin}
+        onChangePin={(newPin, length) => {
+          setCurrentPin(newPin);
+          setPinLength(length);
+        }}
+        pinLength={pinLength}
+        recipientsList={recipientsList}
+        onAddRecipient={handleAddRecipient}
+        onDeleteRecipient={handleDeleteRecipient}
       />
-
-      {/* Global Toast Notification */}
-      {toastNotice && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-50 bg-neutral-900/90 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg backdrop-blur-sm pointer-events-none transition animate-in fade-in slide-in-from-bottom-2 whitespace-nowrap">
-          {toastNotice}
-        </div>
-      )}
     </PhoneFrame>
   );
 }

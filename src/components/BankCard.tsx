@@ -1,6 +1,6 @@
 import React from 'react';
 import { Eye, EyeOff, Copy, Check } from 'lucide-react';
-import { formatETB } from '../utils/banking.ts';
+import { formatETB, OFFICIAL_CBE_LOGO } from '../utils/banking.ts';
 
 interface BankCardProps {
   balance: number;
@@ -24,17 +24,17 @@ export const BankCard: React.FC<BankCardProps> = ({
   copied,
 }) => {
   return (
-    <div className="px-4 mt-1 z-10 shrink-0">
+    <div className="px-4 mt-1 z-10 shrink-0 select-none">
       <div className="relative overflow-hidden rounded-[24px] bg-[#181818] text-[#dfba6c] p-4.5 pt-4 shadow-xl border border-white/10">
         {/* Subtle background texture pattern */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#baa069_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#baa069_1px,transparent_1px)] [background-size:16px_16px]"></div>
 
         {/* Card Header */}
         <div className="relative flex items-center gap-3">
           <img
-            src="https://i.postimg.cc/Hk1pN2VS/20260805-174301.png"
+            src={OFFICIAL_CBE_LOGO}
             alt="CBE"
-            className="w-10 h-10 object-contain shrink-0"
+            className="w-10 h-10 object-contain shrink-0 drop-shadow-sm"
           />
           <div>
             <h3 className="text-[13.5px] font-bold text-[#dfba6c] tracking-wide leading-tight">
@@ -47,10 +47,10 @@ export const BankCard: React.FC<BankCardProps> = ({
         </div>
 
         {/* Balance Row */}
-        <div className="relative my-4 flex items-center justify-center">
+        <div className="relative my-3.5 flex items-center justify-center">
           <div className="flex items-baseline gap-1.5 text-center">
             {isMasked ? (
-              <span className="text-2xl font-bold tracking-[4px] text-white">
+              <span className="text-2xl font-bold tracking-[4px] text-white font-mono">
                 ******
               </span>
             ) : (

@@ -3,23 +3,25 @@ import {
   ArrowLeft,
   Landmark,
   Wallet,
-  QrCode,
   Calculator,
   Plus,
   Trash2,
   ChevronRight,
-  CheckCircle2,
-  Users,
+  Eye,
+  EyeOff,
+  User,
 } from 'lucide-react';
 import { Recipient } from '../types/index.ts';
-import { searchRecipients, INITIAL_RECIPIENTS } from '../utils/banking.ts';
-import { playChime } from '../utils/audio.ts';
+import { searchRecipients, formatETB } from '../utils/banking.ts';
 
 interface TransferScreenProps {
   onBack: () => void;
   onInitiateTransfer: (recipient: Recipient, amount: number, remark: string) => void;
   currentBalance: number;
   userName: string;
+  recipientsList: Recipient[];
+  onDeleteRecipient: (accNumber: string) => void;
+  isProcessingTransfer: boolean;
 }
 
 export const TransferScreen: React.FC<TransferScreenProps> = ({
@@ -27,17 +29,19 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
   onInitiateTransfer,
   currentBalance,
   userName,
+  recipientsList,
+  onDeleteRecipient,
+  isProcessingTransfer,
 }) => {
-  const [accountType, setAccountType] = useState<'other' | 'own'>('other');
-  const [recipientsList, setRecipientsList] = useState<Recipient[]>(INITIAL_RECIPIENTS);
-  const [selectedRecipient, setSelectedRecipient] = useState<Recipient>(INITIAL_RECIPIENTS[0]);
-  const [accountInput, setAccountInput] = useState<string>(INITIAL_RECIPIENTS[0].accountNumber);
-  const [amountInput, setAmountInput] = useState<string>('850');
+  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
+  const [accountInput, setAccountInput] = useState<string>('');
+  const [amountInput, setAmountInput] = useState<string>('');
   const [remarkInput, setRemarkInput] = useState<string>('MB transfer');
   const [isEditingRemark, setIsEditingRemark] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'recent' | 'beneficiaries'>('recent');
   const [suggestions, setSuggestions] = useState<Recipient[]>([]);
   const [errorText, setErrorText] = useState<string>('');
+  const [isFromBalanceMasked, setIsFromBalanceMasked] = useState<boolean>(true);
 
   useEffect(() => {
     if (!accountInput.trim()) {
@@ -58,45 +62,50 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
   }, [accountInput, recipientsList]);
 
   const handleSelectRecipient = (r: Recipient) => {
-    playChime('tap');
     setSelectedRecipient(r);
     setAccountInput(r.accountNumber);
     setSuggestions([]);
     setErrorText('');
   };
 
-  const handleDeleteBeneficiary = (e: React.MouseEvent, accNumber: string) => {
+  const handleDelete = (e: React.MouseEvent, accNumber: string) => {
     e.stopPropagation();
-    playChime('tap');
-    setRecipientsList((prev) => prev.filter((r) => r.accountNumber !== accNumber));
+    onDeleteRecipient(accNumber);
   };
 
   const handleContinue = () => {
     const amt = parseFloat(amountInput);
     if (isNaN(amt) || amt <= 0) {
       setErrorText('Please enter a valid transfer amount');
-      playChime('error');
       return;
     }
     if (amt > currentBalance) {
-      setErrorText(`Insufficient balance. Current balance is ETB ${currentBalance.toFixed(2)}`);
-      playChime('error');
+      setErrorText(`Insufficient balance. Current balance is ETB ${formatETB(currentBalance)}`);
       return;
     }
     if (!selectedRecipient) {
-      setErrorText('Please choose or enter a valid CBE recipient account');
-      playChime('error');
+      // If user typed an account number not in saved list, create a transient recipient
+      if (accountInput.trim().length >= 8) {
+        const customRec: Recipient = {
+          name: 'Recipient ' + accountInput.slice(-4),
+          accountNumber: accountInput.trim(),
+          masked: accountInput.charAt(0) + '*********' + accountInput.slice(-4),
+          initials: 'RC',
+        };
+        onInitiateTransfer(customRec, amt, remarkInput || 'MB transfer');
+        return;
+      }
+      setErrorText('Please enter or select a recipient account');
       return;
     }
 
-    playChime('tap');
     onInitiateTransfer(selectedRecipient, amt, remarkInput || 'MB transfer');
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F5F3EC] overflow-hidden">
+    <div className="flex-1 flex flex-col bg-[#F5F3EC] overflow-hidden select-none relative">
       {/* Header */}
-      <div className="bg-[#7C21A4] px-4.5 pt-3 pb-3 text-white flex items-center gap-3 shrink-0">
+      <div className="bg-[#7C21A4] px-4.5 pt-2 pb-3 text-white flex items-center gap-3 shrink-0">
         <button
           onClick={onBack}
           className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
@@ -108,34 +117,7 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
       </div>
 
       {/* Main Sheet */}
-      <div className="flex-1 bg-white rounded-t-[28px] -mt-1.5 p-4.5 overflow-y-auto no-scrollbar shadow-md">
-        {/* Account Switch Tabs */}
-        <div className="flex items-center gap-2.5 mb-3">
-          <button
-            onClick={() => setAccountType('other')}
-            className={`flex-1 h-9 rounded-full text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-              accountType === 'other'
-                ? 'bg-[#7C21A4] text-white shadow-xs'
-                : 'bg-white border border-neutral-300 text-neutral-600'
-            }`}
-          >
-            <span>Other Account</span>
-            {accountType === 'other' && <span>✓</span>}
-          </button>
-
-          <button
-            onClick={() => setAccountType('own')}
-            className={`flex-1 h-9 rounded-full text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-              accountType === 'own'
-                ? 'bg-[#7C21A4] text-white shadow-xs'
-                : 'bg-white border border-neutral-300 text-neutral-600'
-            }`}
-          >
-            <span>Own Account</span>
-            {accountType === 'own' && <span>✓</span>}
-          </button>
-        </div>
-
+      <div className="flex-1 bg-[#F5F3EC] rounded-t-[28px] -mt-1.5 p-4.5 overflow-y-auto no-scrollbar shadow-inner">
         {/* From Account Card */}
         <div className="bg-[#1c2833] rounded-2xl p-3.5 text-white flex items-center justify-between mb-3 shadow-sm">
           <div>
@@ -143,58 +125,57 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
             <div className="text-[13px] font-bold mt-0.5 tracking-wide">
               Wadiah Ordinary 1*********9427
             </div>
-            <div className="text-[11px] text-neutral-400 mt-1 flex items-center gap-1.5 font-mono">
-              <span>••••••</span>
-              <span>👁</span>
+            {/* Real balance with SVG eye toggle (no emojis!) */}
+            <div className="text-[11px] text-neutral-300 mt-1 flex items-center gap-2">
+              <span className="font-mono">
+                {isFromBalanceMasked ? '••••••' : `${formatETB(currentBalance)} ETB`}
+              </span>
+              <button
+                onClick={() => setIsFromBalanceMasked(!isFromBalanceMasked)}
+                className="text-neutral-400 hover:text-white p-0.5 transition"
+                aria-label={isFromBalanceMasked ? 'Reveal balance' : 'Hide balance'}
+              >
+                {isFromBalanceMasked ? (
+                  <EyeOff className="w-3.5 h-3.5" />
+                ) : (
+                  <Eye className="w-3.5 h-3.5" />
+                )}
+              </button>
             </div>
-          </div>
-
-          <div className="text-right">
-            <span className="text-[#dfba6c] text-[11px] font-bold block">▾</span>
-            <span className="text-[#dfba6c] text-xs font-bold">Change</span>
           </div>
         </div>
 
-        {/* Receiver Resolved Banner */}
+        {/* Receiver Name Row */}
         {selectedRecipient && (
-          <div className="bg-[#f8edf9] border border-[#e8cbf0] rounded-xl p-2.5 px-3 flex items-center justify-between mb-3 animate-in fade-in">
-            <div>
-              <span className="text-[9.5px] font-bold tracking-wider text-neutral-500 uppercase">
-                Receiver Name
-              </span>
-              <h4 className="text-[13px] font-extrabold text-[#7C21A4] leading-tight">
-                {selectedRecipient.name}
-              </h4>
-            </div>
-            <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>VERIFIED</span>
-            </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-neutral-700 px-1 mb-2">
+            <span className="text-neutral-400 font-normal">Name</span>
+            <span className="text-neutral-900">{selectedRecipient.name}</span>
           </div>
         )}
 
         {/* Account Number Input */}
         <div className="relative mb-2.5">
           <div className="h-12 bg-white rounded-xl border border-neutral-300 px-3.5 flex items-center gap-3 shadow-2xs focus-within:border-[#7C21A4]">
-            <Landmark className="w-4.5 h-4.5 text-[#7C21A4] shrink-0" />
+            <Landmark className="w-4.5 h-4.5 text-neutral-500 shrink-0" />
             <input
               type="text"
-              placeholder="Account Number or Name"
+              placeholder="Account Number"
               value={accountInput}
               onChange={(e) => setAccountInput(e.target.value)}
-              className="w-full text-xs font-medium text-neutral-800 outline-none placeholder:text-neutral-400"
+              className="w-full text-xs font-semibold text-neutral-800 outline-none placeholder:text-neutral-400 font-mono"
             />
             <button
-              onClick={() => playChime('tap')}
-              className="text-[#7C21A4] hover:text-[#581577] p-1 shrink-0"
-              title="Scan QR Code"
-              aria-label="Scan account QR code"
+              onClick={() => {
+                if (recipientsList.length > 0) handleSelectRecipient(recipientsList[0]);
+              }}
+              className="text-neutral-400 hover:text-neutral-700 p-1 shrink-0"
+              title="Select beneficiary"
             >
-              <QrCode className="w-4.5 h-4.5" />
+              <User className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Autocomplete Dropdown */}
+          {/* Autocomplete Dropdown matching IMG_20261106_230128_179_3a591c87.jpg */}
           {suggestions.length > 0 && (
             <div className="absolute top-13 left-0 right-0 bg-white rounded-xl shadow-xl border border-neutral-200 z-50 max-h-48 overflow-y-auto divide-y divide-neutral-100">
               {suggestions.map((item) => (
@@ -203,13 +184,18 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
                   onClick={() => handleSelectRecipient(item)}
                   className="p-2.5 px-3.5 hover:bg-purple-50 cursor-pointer flex items-center justify-between"
                 >
-                  <div>
-                    <div className="text-xs font-bold text-neutral-800">{item.name}</div>
-                    <div className="text-[11px] text-neutral-500 font-mono">
-                      {item.accountNumber}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-purple-100 text-[#7C21A4] flex items-center justify-center text-[10px] font-bold">
+                      <Landmark className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-neutral-800">{item.name}</div>
+                      <div className="text-[11px] text-neutral-500 font-mono">
+                        {item.accountNumber}
+                      </div>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-[#7C21A4] uppercase">Select</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
                 </div>
               ))}
             </div>
@@ -218,7 +204,7 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
 
         {/* Amount Input */}
         <div className="h-12 bg-white rounded-xl border border-neutral-300 px-3.5 flex items-center gap-3 mb-2 shadow-2xs focus-within:border-[#7C21A4]">
-          <Wallet className="w-4.5 h-4.5 text-[#7C21A4] shrink-0" />
+          <Wallet className="w-4.5 h-4.5 text-neutral-500 shrink-0" />
           <input
             type="number"
             placeholder="Amount*"
@@ -226,7 +212,7 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
             onChange={(e) => setAmountInput(e.target.value)}
             className="w-full text-xs font-semibold font-mono text-neutral-800 outline-none placeholder:text-neutral-400"
           />
-          <Calculator className="w-4.5 h-4.5 text-[#7C21A4] shrink-0" />
+          <Calculator className="w-4.5 h-4.5 text-neutral-400 shrink-0" />
         </div>
 
         {/* Add Remark */}
@@ -250,7 +236,7 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
               </div>
               <span>
                 Add remark{' '}
-                <span className="text-[11px] text-neutral-400 italic">
+                <span className="text-[11px] text-neutral-400">
                   *Default: {remarkInput || 'MB transfer'}
                 </span>
               </span>
@@ -273,28 +259,28 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
         </button>
 
         {/* Tabs: Recent Transfers / Beneficiaries */}
-        <div className="flex items-center gap-6 border-b border-neutral-200 pb-2 mb-3 text-xs font-bold">
+        <div className="flex items-center gap-8 border-b border-neutral-200 pb-2 mb-3 text-xs font-bold">
           <button
             onClick={() => setActiveTab('recent')}
             className={`relative pb-1.5 transition ${
-              activeTab === 'recent' ? 'text-[#7C21A4]' : 'text-neutral-400'
+              activeTab === 'recent' ? 'text-neutral-900' : 'text-neutral-400'
             }`}
           >
             <span>Recent Transfers</span>
             {activeTab === 'recent' && (
-              <span className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-[#7C21A4]"></span>
+              <span className="absolute bottom-[-9px] left-0 right-0 h-[2px] bg-[#7C21A4]"></span>
             )}
           </button>
 
           <button
             onClick={() => setActiveTab('beneficiaries')}
             className={`relative pb-1.5 transition ${
-              activeTab === 'beneficiaries' ? 'text-[#7C21A4]' : 'text-neutral-400'
+              activeTab === 'beneficiaries' ? 'text-neutral-900' : 'text-neutral-400'
             }`}
           >
             <span>Beneficiaries</span>
             {activeTab === 'beneficiaries' && (
-              <span className="absolute bottom-[-9px] left-0 right-0 h-0.5 bg-[#7C21A4]"></span>
+              <span className="absolute bottom-[-9px] left-0 right-0 h-[2px] bg-[#7C21A4]"></span>
             )}
           </button>
         </div>
@@ -323,7 +309,7 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
 
               <div className="flex items-center gap-3 text-neutral-400">
                 <button
-                  onClick={(e) => handleDeleteBeneficiary(e, rec.accountNumber)}
+                  onClick={(e) => handleDelete(e, rec.accountNumber)}
                   className="p-1 hover:text-red-500 transition"
                   title="Remove Beneficiary"
                   aria-label={`Remove beneficiary ${rec.name}`}
@@ -336,6 +322,13 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
           ))}
         </div>
       </div>
+
+      {/* 360° Circular Rotating Purple Loader Overlay matching IMG_20261106_230128_031_6cb96595.jpg */}
+      {isProcessingTransfer && (
+        <div className="absolute inset-0 bg-black/40 z-50 flex items-center justify-center animate-in fade-in duration-150">
+          <div className="w-20 h-20 rounded-full border-4 border-white/30 border-t-[#7C21A4] border-r-[#9b34cb] animate-spin"></div>
+        </div>
+      )}
     </div>
   );
 };

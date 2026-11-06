@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { X, QrCode, Flashlight, Camera } from 'lucide-react';
 import { Recipient } from '../types/index.ts';
 import { INITIAL_RECIPIENTS } from '../utils/banking.ts';
-import { playChime } from '../utils/audio.ts';
 
 interface ScanQrModalProps {
   isOpen: boolean;
@@ -20,7 +19,6 @@ export const ScanQrModal: React.FC<ScanQrModalProps> = ({
   if (!isOpen) return null;
 
   const handleSimulateScan = (recipient: Recipient) => {
-    playChime('success');
     onScanSuccess(recipient);
   };
 

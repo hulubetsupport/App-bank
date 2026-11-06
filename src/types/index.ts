@@ -11,6 +11,7 @@ export interface Transaction {
   type: TxType;
   category: string;
   referenceId: string;
+  receiptId?: string;
   accountNumber?: string;
   remark?: string;
 }

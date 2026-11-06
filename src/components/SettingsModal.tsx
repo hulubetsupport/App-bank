@@ -1,53 +1,148 @@
 import React, { useState } from 'react';
 import {
   X,
-  ShieldCheck,
-  Bell,
   Lock,
   Globe,
-  GitBranch,
-  History,
   LogOut,
-  ChevronRight,
-  Check,
   User,
+  Plus,
+  Trash2,
+  Wallet,
+  Check,
+  KeyRound,
+  Users,
 } from 'lucide-react';
+import { Recipient } from '../types/index.ts';
+import { formatETB } from '../utils/banking.ts';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   userName: string;
-  onSwitchUser: () => void;
+  onUpdateUserName: (name: string) => void;
+  balance: number;
+  onUpdateBalance: (balance: number) => void;
   language: string;
   onToggleLanguage: () => void;
   onLogout: () => void;
-  onOpenCiCd: () => void;
-  onOpenActivityLogs: () => void;
-  onOpenNotifications: () => void;
-  onNotice: (msg: string) => void;
+  correctPin: string;
+  onChangePin: (newPin: string, length: number) => void;
+  pinLength: number;
+  recipientsList: Recipient[];
+  onAddRecipient: (rec: Recipient) => void;
+  onDeleteRecipient: (accNumber: string) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   userName,
-  onSwitchUser,
+  onUpdateUserName,
+  balance,
+  onUpdateBalance,
   language,
   onToggleLanguage,
   onLogout,
-  onOpenCiCd,
-  onOpenActivityLogs,
-  onOpenNotifications,
-  onNotice,
+  correctPin,
+  onChangePin,
+  pinLength,
+  recipientsList,
+  onAddRecipient,
+  onDeleteRecipient,
 }) => {
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [biometricEnabled, setBiometricEnabled] = useState(true);
+  // Editing profile name
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(userName);
+
+  // Editing balance
+  const [isEditingBalance, setIsEditingBalance] = useState(false);
+  const [balanceInput, setBalanceInput] = useState(balance.toString());
+
+  // Changing PIN (4 or 6 digit options, hidden from plain view)
+  const [isChangingPin, setIsChangingPin] = useState(false);
+  const [selectedPinLength, setSelectedPinLength] = useState<number>(pinLength);
+  const [oldPin, setOldPin] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [pinSuccess, setPinSuccess] = useState(false);
+
+  // Adding new beneficiary
+  const [isAddingBeneficiary, setIsAddingBeneficiary] = useState(false);
+  const [newBeneficiaryName, setNewBeneficiaryName] = useState('');
+  const [newBeneficiaryAcc, setNewBeneficiaryAcc] = useState('');
+  const [beneficiaryError, setBeneficiaryError] = useState('');
 
   if (!isOpen) return null;
 
+  const handleSaveName = () => {
+    if (nameInput.trim()) {
+      onUpdateUserName(nameInput.trim());
+      setIsEditingName(false);
+    }
+  };
+
+  const handleSaveBalance = () => {
+    const parsed = parseFloat(balanceInput);
+    if (!isNaN(parsed) && parsed >= 0) {
+      onUpdateBalance(parsed);
+      setIsEditingBalance(false);
+    }
+  };
+
+  const handleSavePin = () => {
+    setPinError('');
+    if (oldPin !== correctPin) {
+      setPinError('Current PIN is incorrect');
+      return;
+    }
+    if (newPin.length !== selectedPinLength) {
+      setPinError(`New PIN must be exactly ${selectedPinLength} digits`);
+      return;
+    }
+    onChangePin(newPin, selectedPinLength);
+    setPinSuccess(true);
+    setTimeout(() => {
+      setPinSuccess(false);
+      setIsChangingPin(false);
+      setOldPin('');
+      setNewPin('');
+    }, 1200);
+  };
+
+  const handleSaveBeneficiary = () => {
+    setBeneficiaryError('');
+    if (!newBeneficiaryName.trim() || !newBeneficiaryAcc.trim()) {
+      setBeneficiaryError('Please enter both name and account number');
+      return;
+    }
+    const cleanAcc = newBeneficiaryAcc.trim();
+    const cleanName = newBeneficiaryName.trim();
+    const initials = cleanName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+    const masked =
+      cleanAcc.length > 4
+        ? cleanAcc.charAt(0) + '*********' + cleanAcc.slice(-4)
+        : cleanAcc;
+
+    onAddRecipient({
+      name: cleanName,
+      accountNumber: cleanAcc,
+      masked,
+      initials,
+    });
+
+    setNewBeneficiaryName('');
+    setNewBeneficiaryAcc('');
+    setIsAddingBeneficiary(false);
+  };
+
   return (
-    <div className="absolute inset-0 bg-black/60 z-50 flex flex-col justify-end animate-in fade-in duration-200">
-      <div className="bg-white rounded-t-[32px] max-h-[85%] flex flex-col p-5 shadow-2xl animate-in slide-in-from-bottom-10 duration-200">
+    <div className="absolute inset-0 bg-black/60 z-50 flex flex-col justify-end animate-in fade-in duration-200 select-none">
+      <div className="bg-white rounded-t-[32px] max-h-[88%] flex flex-col p-5 shadow-2xl animate-in slide-in-from-bottom-10 duration-200">
         <div className="w-10 h-1 bg-neutral-300 rounded-full mx-auto mb-3"></div>
 
         {/* Header */}
@@ -57,8 +152,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <User className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-neutral-800">Settings &amp; Profile</h3>
-              <p className="text-[10px] text-neutral-400">Account: Wadiah Ordinary 1000562339427</p>
+              <h3 className="text-sm font-extrabold text-neutral-800">Settings &amp; Accounts</h3>
+              <p className="text-[10px] text-neutral-400">Commercial Bank of Ethiopia</p>
             </div>
           </div>
 
@@ -70,125 +165,272 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Settings Items */}
-        <div className="flex-1 overflow-y-auto space-y-2 py-3 pr-1 text-xs">
-          {/* User profile toggle */}
-          <div
-            onClick={onSwitchUser}
-            className="p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 transition flex items-center justify-between cursor-pointer border border-neutral-200"
-          >
-            <div className="flex items-center gap-2.5">
-              <User className="w-4 h-4 text-[#7C21A4]" />
-              <div>
-                <div className="font-bold text-neutral-800">Active Profile: {userName}</div>
-                <div className="text-[10px] text-neutral-500">Tap to switch user profile</div>
-              </div>
+        {/* Settings Body */}
+        <div className="flex-1 overflow-y-auto space-y-3 py-3 pr-1 text-xs no-scrollbar">
+          {/* 1. Account Holder Full Name (Editable) */}
+          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                Account Holder Full Name
+              </span>
+              {!isEditingName && (
+                <button
+                  onClick={() => setIsEditingName(true)}
+                  className="text-xs font-bold text-[#7C21A4] hover:underline"
+                >
+                  Edit Name
+                </button>
+              )}
             </div>
-            <ChevronRight className="w-4 h-4 text-neutral-400" />
+
+            {isEditingName ? (
+              <div className="flex items-center gap-2 mt-1.5">
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  className="flex-1 h-8.5 px-3 bg-white border border-neutral-300 rounded-xl outline-none font-semibold text-neutral-800"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveName}
+                  className="h-8.5 px-3.5 bg-[#7C21A4] text-white rounded-xl font-bold flex items-center gap-1"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Save</span>
+                </button>
+              </div>
+            ) : (
+              <div className="text-sm font-bold text-neutral-900 mt-0.5">{userName}</div>
+            )}
           </div>
 
-          {/* Security & Password */}
-          <div
-            onClick={() => onNotice('Real Password set to 0607')}
-            className="p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 transition flex items-center justify-between cursor-pointer border border-neutral-200"
-          >
-            <div className="flex items-center gap-2.5">
-              <Lock className="w-4 h-4 text-[#7C21A4]" />
-              <div>
-                <div className="font-bold text-neutral-800">Security &amp; PIN</div>
-                <div className="text-[10px] text-neutral-500">
-                  Current PIN: <span className="font-mono font-bold text-neutral-800">0607</span>
+          {/* 2. Account Balance (Editable) */}
+          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1">
+                <Wallet className="w-3 h-3 text-[#7C21A4]" />
+                <span>Account Balance</span>
+              </span>
+              {!isEditingBalance && (
+                <button
+                  onClick={() => setIsEditingBalance(true)}
+                  className="text-xs font-bold text-[#7C21A4] hover:underline"
+                >
+                  Edit Balance
+                </button>
+              )}
+            </div>
+
+            {isEditingBalance ? (
+              <div className="flex items-center gap-2 mt-1.5">
+                <input
+                  type="number"
+                  value={balanceInput}
+                  onChange={(e) => setBalanceInput(e.target.value)}
+                  className="flex-1 h-8.5 px-3 bg-white border border-neutral-300 rounded-xl outline-none font-semibold font-mono text-neutral-800"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveBalance}
+                  className="h-8.5 px-3.5 bg-[#7C21A4] text-white rounded-xl font-bold flex items-center gap-1"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Save</span>
+                </button>
+              </div>
+            ) : (
+              <div className="text-sm font-bold text-neutral-900 font-mono mt-0.5">
+                {formatETB(balance)} ETB
+              </div>
+            )}
+          </div>
+
+          {/* 3. Security & PIN Change (Hidden real password with 4 or 6 digit option) */}
+          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1">
+                <Lock className="w-3 h-3 text-[#7C21A4]" />
+                <span>Security PIN ({pinLength} Digits)</span>
+              </span>
+              {!isChangingPin && (
+                <button
+                  onClick={() => setIsChangingPin(true)}
+                  className="text-xs font-bold text-[#7C21A4] hover:underline"
+                >
+                  Change PIN
+                </button>
+              )}
+            </div>
+
+            {isChangingPin ? (
+              <div className="mt-2 space-y-2 bg-white p-3 rounded-xl border border-neutral-200">
+                {/* 4 or 6 digit option toggle */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[11px] text-neutral-500 font-medium">PIN Format:</span>
+                  <button
+                    onClick={() => setSelectedPinLength(4)}
+                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition ${
+                      selectedPinLength === 4
+                        ? 'bg-[#7C21A4] text-white'
+                        : 'bg-neutral-100 text-neutral-600'
+                    }`}
+                  >
+                    4 Digits
+                  </button>
+                  <button
+                    onClick={() => setSelectedPinLength(6)}
+                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition ${
+                      selectedPinLength === 6
+                        ? 'bg-[#7C21A4] text-white'
+                        : 'bg-neutral-100 text-neutral-600'
+                    }`}
+                  >
+                    6 Digits
+                  </button>
+                </div>
+
+                <input
+                  type="password"
+                  placeholder="Current PIN"
+                  maxLength={6}
+                  value={oldPin}
+                  onChange={(e) => setOldPin(e.target.value)}
+                  className="w-full h-8 px-3 bg-neutral-50 border border-neutral-300 rounded-lg outline-none font-mono text-xs"
+                />
+
+                <input
+                  type="password"
+                  placeholder={`New ${selectedPinLength}-Digit PIN`}
+                  maxLength={selectedPinLength}
+                  value={newPin}
+                  onChange={(e) => setNewPin(e.target.value)}
+                  className="w-full h-8 px-3 bg-neutral-50 border border-neutral-300 rounded-lg outline-none font-mono text-xs"
+                />
+
+                {pinError && <p className="text-[10.5px] text-red-600 font-semibold">{pinError}</p>}
+                {pinSuccess && (
+                  <p className="text-[10.5px] text-emerald-600 font-semibold">
+                    PIN updated successfully!
+                  </p>
+                )}
+
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => setIsChangingPin(false)}
+                    className="flex-1 h-7.5 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-semibold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSavePin}
+                    className="flex-1 h-7.5 rounded-lg bg-[#7C21A4] text-white text-xs font-bold"
+                  >
+                    Update PIN
+                  </button>
                 </div>
               </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-neutral-400" />
-          </div>
-
-          {/* Real-time Push Notifications toggle */}
-          <div className="p-3 rounded-2xl bg-neutral-50 flex items-center justify-between border border-neutral-200">
-            <div className="flex items-center gap-2.5">
-              <Bell className="w-4 h-4 text-[#7C21A4]" />
-              <div>
-                <div className="font-bold text-neutral-800">Push Notifications</div>
-                <div className="text-[10px] text-neutral-500">Instant debit and credit alerts</div>
+            ) : (
+              <div className="text-xs text-neutral-500 font-medium mt-0.5 flex items-center gap-1.5">
+                <span>••••••</span>
+                <span className="text-[10px] text-neutral-400">(PIN protected)</span>
               </div>
-            </div>
-            <button
-              onClick={() => {
-                setPushEnabled(!pushEnabled);
-                onNotice(pushEnabled ? 'Push notifications disabled' : 'Push notifications enabled');
-              }}
-              className={`w-11 h-6 rounded-full transition-colors relative ${
-                pushEnabled ? 'bg-[#7C21A4]' : 'bg-neutral-300'
-              }`}
-            >
-              <span
-                className={`w-5 h-5 rounded-full bg-white shadow-md absolute top-0.5 transition-transform ${
-                  pushEnabled ? 'right-0.5' : 'left-0.5'
-                }`}
-              />
-            </button>
+            )}
           </div>
 
-          {/* Language toggle */}
+          {/* 4. Manage Saved Accounts / Beneficiaries */}
+          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-1">
+                <Users className="w-3 h-3 text-[#7C21A4]" />
+                <span>Saved Beneficiary Accounts</span>
+              </span>
+              <button
+                onClick={() => setIsAddingBeneficiary(!isAddingBeneficiary)}
+                className="text-xs font-bold text-[#7C21A4] flex items-center gap-1 hover:underline"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Account</span>
+              </button>
+            </div>
+
+            {/* Add Beneficiary form */}
+            {isAddingBeneficiary && (
+              <div className="p-3 bg-white rounded-xl border border-neutral-200 mb-2 space-y-2">
+                <input
+                  type="text"
+                  placeholder="Beneficiary Full Name"
+                  value={newBeneficiaryName}
+                  onChange={(e) => setNewBeneficiaryName(e.target.value)}
+                  className="w-full h-8 px-3 bg-neutral-50 border border-neutral-300 rounded-lg outline-none text-xs"
+                />
+                <input
+                  type="text"
+                  placeholder="Account Number (e.g. 1000...)"
+                  value={newBeneficiaryAcc}
+                  onChange={(e) => setNewBeneficiaryAcc(e.target.value)}
+                  className="w-full h-8 px-3 bg-neutral-50 border border-neutral-300 rounded-lg outline-none text-xs font-mono"
+                />
+                {beneficiaryError && (
+                  <p className="text-[10.5px] text-red-600 font-semibold">{beneficiaryError}</p>
+                )}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => setIsAddingBeneficiary(false)}
+                    className="flex-1 h-7 rounded-lg bg-neutral-100 text-neutral-600 text-xs font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveBeneficiary}
+                    className="flex-1 h-7 rounded-lg bg-[#7C21A4] text-white text-xs font-bold"
+                  >
+                    Save Account
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* List of saved accounts */}
+            <div className="max-h-36 overflow-y-auto divide-y divide-neutral-200 pr-1">
+              {recipientsList.map((rec) => (
+                <div key={rec.accountNumber} className="py-1.5 flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-neutral-800 text-[12px]">{rec.name}</div>
+                    <div className="text-[10px] text-neutral-400 font-mono">{rec.accountNumber}</div>
+                  </div>
+                  <button
+                    onClick={() => onDeleteRecipient(rec.accountNumber)}
+                    className="p-1 text-neutral-400 hover:text-red-500"
+                    title="Remove Account"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 5. Language */}
           <div
             onClick={onToggleLanguage}
-            className="p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 transition flex items-center justify-between cursor-pointer border border-neutral-200"
+            className="p-3.5 rounded-2xl bg-neutral-50 flex items-center justify-between border border-neutral-200 cursor-pointer"
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-[#7C21A4]" />
-              <div>
-                <div className="font-bold text-neutral-800">App Language</div>
-                <div className="text-[10px] text-neutral-500">Current: {language}</div>
-              </div>
+              <span className="font-semibold text-neutral-800 text-xs">App Language</span>
             </div>
             <span className="text-xs font-bold text-[#7C21A4]">{language} ▾</span>
           </div>
 
-          {/* Activity Logs trigger */}
-          <div
-            onClick={() => {
-              onClose();
-              onOpenActivityLogs();
-            }}
-            className="p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 transition flex items-center justify-between cursor-pointer border border-neutral-200"
-          >
-            <div className="flex items-center gap-2.5">
-              <History className="w-4 h-4 text-amber-600" />
-              <div>
-                <div className="font-bold text-neutral-800">Detailed Activity Tracking</div>
-                <div className="text-[10px] text-neutral-500">View audit logs &amp; export data</div>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-neutral-400" />
-          </div>
-
-          {/* GitHub CI/CD trigger */}
-          <div
-            onClick={() => {
-              onClose();
-              onOpenCiCd();
-            }}
-            className="p-3 rounded-2xl bg-neutral-50 hover:bg-neutral-100 transition flex items-center justify-between cursor-pointer border border-neutral-200"
-          >
-            <div className="flex items-center gap-2.5">
-              <GitBranch className="w-4 h-4 text-purple-600" />
-              <div>
-                <div className="font-bold text-neutral-900">GitHub CI/CD &amp; Testing Package</div>
-                <div className="text-[10px] text-neutral-500">Continuous integration &amp; distribution</div>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-neutral-400" />
-          </div>
-
-          {/* Logout button */}
-          <div className="pt-3">
+          {/* 6. Sign Out Button */}
+          <div className="pt-2">
             <button
               onClick={onLogout}
-              className="w-full h-11 rounded-2xl bg-red-50 hover:bg-red-100 active:scale-[0.99] text-red-700 font-bold text-xs flex items-center justify-center gap-2 border border-red-200 transition"
+              className="w-full h-11 rounded-2xl bg-[#faedf0] hover:bg-[#f7dfe4] active:scale-[0.99] text-[#cf3a4b] font-bold text-xs flex items-center justify-center gap-2 transition"
             >
               <LogOut className="w-4 h-4" />
-              <span>Sign Out &amp; Lock CBE App</span>
+              <span>Sign Out &amp; Lock App</span>
             </button>
           </div>
         </div>
