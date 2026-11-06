@@ -1,0 +1,6 @@
+{
+  "name": "Commercial Bank of Ethiopia - CBE Mobile Banking",
+  "description": "CBE Mobile Banking with secure PIN authentication, real-time push notifications, instant CBE transfer, mini statement, activity audit tracking, and GitHub CI/CD workflow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

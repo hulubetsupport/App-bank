@@ -1,0 +1,67 @@
+name: CBE Mobile Banking CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Lint & Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Type Checking & Lint
+        run: npm run lint
+
+      - name: Run Unit Tests (Pure Logic Verification)
+        run: npx tsx --test src/**/*.test.ts
+
+  build-and-distribute:
+    name: Build & Package App for Distribution
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Web Application & PWA
+        run: npm run build
+
+      - name: Package Distributable Artifacts (PWA / APK Bundle)
+        run: |
+          mkdir -p distribution
+          cp -r dist/* distribution/
+          zip -r cbe-mobile-banking-v1.0.0-dist.zip distribution/
+          echo "Distribution package generated successfully."
+
+      - name: Upload Build Artifact for Testing & Installation
+        uses: actions/upload-artifact@v4
+        with:
+          name: cbe-mobile-banking-app-package
+          path: cbe-mobile-banking-v1.0.0-dist.zip
+          retention-days: 14
