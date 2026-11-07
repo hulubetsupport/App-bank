@@ -50,11 +50,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Set up Java 17 (JDK)
+      - name: Set up Java 21 (JDK)
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Configure Android SDK & Install API 36
         run: |
