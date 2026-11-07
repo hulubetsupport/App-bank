@@ -153,8 +153,8 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
           </div>
         </div>
 
-        {/* Bottom Actions: Receipt, Screenshot, Share */}
-        <div className="w-full flex items-center justify-around text-neutral-700 mt-6 px-4 pb-6">
+        {/* Bottom Actions matching original IMG_20261106_230127_820.jpg */}
+        <div className="w-full flex items-center justify-around text-neutral-700 mt-6 px-4">
           <button
             onClick={() => {}}
             className="flex items-center gap-1.5 text-xs font-semibold hover:text-[#7C21A4] transition active:scale-95"
@@ -172,11 +172,28 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
           </button>
 
           <button
-            onClick={onClose}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#7C21A4] hover:opacity-80 transition active:scale-95"
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({
+                  title: 'CBE Transaction Receipt',
+                  text: `CBE Transaction ID: ${transaction.referenceId} - ETB ${transaction.amount} paid to ${transaction.name}`,
+                }).catch(() => {});
+              }
+            }}
+            className="flex items-center gap-1.5 text-xs font-semibold hover:text-[#7C21A4] transition active:scale-95"
           >
-            <Share2 className="w-4 h-4" />
-            <span>Close</span>
+            <Share2 className="w-4 h-4 text-neutral-800" />
+            <span>Share</span>
+          </button>
+        </div>
+
+        {/* Dedicated Full-Width Close Pill Button matching original screenshot */}
+        <div className="w-full px-2 mt-5 mb-6">
+          <button
+            onClick={onClose}
+            className="w-full h-11 rounded-full bg-[#dedede] hover:bg-[#d4d4d4] active:scale-[0.99] text-neutral-800 font-semibold text-[14px] transition shadow-2xs"
+          >
+            Close
           </button>
         </div>
       </div>

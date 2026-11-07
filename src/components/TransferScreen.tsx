@@ -113,6 +113,16 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col bg-[#F5F3EC] overflow-hidden select-none relative w-full">
+      {/* 360° Purple Circular Rotating Loader matching IMG_20261106_230128_031.jpg */}
+      {isProcessingTransfer && (
+        <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center select-none">
+          <div className="relative w-20 h-20 flex items-center justify-center">
+            <div className="w-18 h-18 rounded-full border-[5px] border-purple-200/20"></div>
+            <div className="absolute w-18 h-18 rounded-full border-[5px] border-transparent border-t-[#c084fc] border-r-[#7C21A4] animate-spin"></div>
+          </div>
+        </div>
+      )}
+
       {/* Header with back arrow and title */}
       <header className="bg-[#7C21A4] px-4 pt-[calc(env(safe-area-inset-top,0px)+8px)] pb-3.5 text-white flex items-center gap-3 shrink-0">
         <button
