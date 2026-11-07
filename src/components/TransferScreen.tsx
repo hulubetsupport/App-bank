@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
-  Landmark,
-  Wallet,
-  Calculator,
+  Building2,
+  Users,
   Plus,
   Trash2,
   ChevronRight,
   Eye,
   EyeOff,
   User,
+  CreditCard,
 } from 'lucide-react';
 import { Recipient } from '../types/index.ts';
 import { searchRecipients, formatETB } from '../utils/banking.ts';
@@ -46,6 +46,12 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
   const [suggestions, setSuggestions] = useState<Recipient[]>([]);
   const [errorText, setErrorText] = useState<string>('');
   const [isFromBalanceMasked, setIsFromBalanceMasked] = useState<boolean>(true);
+
+  // Masked representation: 1*********9427
+  const maskedAcc =
+    accountNumber.length > 4
+      ? `${accountNumber.charAt(0)}*********${accountNumber.slice(-4)}`
+      : accountNumber;
 
   useEffect(() => {
     if (!accountInput.trim()) {
@@ -88,13 +94,12 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
       return;
     }
     if (!selectedRecipient) {
-      // If user typed an account number not in saved list, create a transient recipient
       if (accountInput.trim().length >= 8) {
         const customRec: Recipient = {
-          name: 'Recipient ' + accountInput.slice(-4),
+          name: 'Beneficiary ' + accountInput.slice(-4),
           accountNumber: accountInput.trim(),
           masked: accountInput.charAt(0) + '*********' + accountInput.slice(-4),
-          initials: 'RC',
+          initials: 'BE',
         };
         onInitiateTransfer(customRec, amt, remarkInput || 'MB transfer');
         return;
@@ -107,239 +112,234 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#F5F3EC] overflow-hidden select-none relative">
-      {/* Header */}
-      <div className="bg-[#7C21A4] px-4.5 pt-2 pb-3 text-white flex items-center gap-3 shrink-0">
+    <div className="flex-1 flex flex-col bg-[#F5F3EC] overflow-hidden select-none relative w-full">
+      {/* Header with back arrow and title */}
+      <header className="bg-[#7C21A4] px-4 pt-[calc(env(safe-area-inset-top,0px)+8px)] pb-3.5 text-white flex items-center gap-3 shrink-0">
         <button
           onClick={onBack}
-          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
+          className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 text-white flex items-center justify-center transition"
           aria-label="Back"
         >
-          <ArrowLeft className="w-4.5 h-4.5" />
+          <ArrowLeft className="w-5 h-5" />
         </button>
-        <h2 className="text-base font-bold tracking-tight">CBE Transfer</h2>
-      </div>
+        <h2 className="text-[17px] font-bold tracking-tight">CBE Transfer</h2>
+      </header>
 
-      {/* Main Sheet */}
-      <div className="flex-1 bg-[#F5F3EC] rounded-t-[28px] -mt-1.5 p-4.5 overflow-y-auto no-scrollbar shadow-inner">
-        {/* From Account Card */}
-        <div className="bg-[#1c2833] rounded-2xl p-3.5 text-white flex items-center justify-between mb-3 shadow-sm">
-          <div>
-            <div className="text-[10.5px] text-neutral-400 font-medium">From Account</div>
-            <div className="text-[13px] font-bold mt-0.5 tracking-wide">
-              {accountName}{' '}
-              <span className="font-mono">
-                {isFromBalanceMasked
-                  ? accountNumber.length > 4
-                    ? `${accountNumber.charAt(0)}*********${accountNumber.slice(-4)}`
-                    : accountNumber
-                  : accountNumber}
-              </span>
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-8">
+        {/* "From Account" Card with masked balance and eye icon */}
+        <div className="bg-[#1e2a38] rounded-[18px] p-4 text-white shadow-sm border border-white/10 mb-3">
+          <div className="text-[11px] text-neutral-400 font-medium">From Account</div>
+          <div className="text-[14px] font-bold mt-1 tracking-wide flex items-center gap-2">
+            <span>{accountName}</span>
+            <span className="font-mono text-neutral-200">{maskedAcc}</span>
+          </div>
+          <div className="text-[12px] text-neutral-300 mt-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-neutral-400">Balance:</span>
+              {isFromBalanceMasked ? (
+                <span className="font-mono font-bold tracking-[3px] text-white">******</span>
+              ) : (
+                <span className="font-bold text-white font-mono">{formatETB(currentBalance)} ETB</span>
+              )}
             </div>
-            {/* Real balance with SVG eye toggle (no emojis!) */}
-            <div className="text-[11px] text-neutral-300 mt-1 flex items-center gap-2">
-              <span className="font-mono font-bold">
-                {isFromBalanceMasked ? '••••••' : `${formatETB(currentBalance)} ETB`}
-              </span>
-              <button
-                onClick={() => setIsFromBalanceMasked(!isFromBalanceMasked)}
-                className="text-neutral-400 hover:text-white p-0.5 transition"
-                aria-label={isFromBalanceMasked ? 'Reveal balance & account' : 'Hide balance & account'}
-              >
-                {isFromBalanceMasked ? (
-                  <EyeOff className="w-3.5 h-3.5 stroke-[2.2]" />
-                ) : (
-                  <Eye className="w-3.5 h-3.5 stroke-[2.2]" />
-                )}
-              </button>
-            </div>
+            <button
+              onClick={() => setIsFromBalanceMasked(!isFromBalanceMasked)}
+              className="p-1 text-neutral-300 hover:text-white transition active:scale-90"
+              aria-label={isFromBalanceMasked ? 'Reveal balance' : 'Hide balance'}
+            >
+              {isFromBalanceMasked ? (
+                <EyeOff className="w-4 h-4 stroke-[2.2]" />
+              ) : (
+                <Eye className="w-4 h-4 stroke-[2.2]" />
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Receiver Name Row */}
+        {/* Selected Recipient Name Row (if selected) */}
         {selectedRecipient && (
-          <div className="flex items-center gap-2 text-xs font-bold text-neutral-700 px-1 mb-2">
-            <span className="text-neutral-400 font-normal">Name</span>
-            <span className="text-neutral-900">{selectedRecipient.name}</span>
+          <div className="bg-white rounded-xl px-4 py-2.5 mb-2.5 border border-neutral-200/70 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-xs text-neutral-500 font-medium">Name:</span>
+              <span className="text-[13px] font-bold text-[#7C21A4] truncate">
+                {selectedRecipient.name}
+              </span>
+            </div>
+            <span className="text-xs text-neutral-400 font-mono">
+              {selectedRecipient.accountNumber.slice(-4)}
+            </span>
           </div>
         )}
 
-        {/* Account Number Input */}
+        {/* Search input with bank icon and contacts icon */}
         <div className="relative mb-2.5">
-          <div className="h-12 bg-white rounded-xl border border-neutral-300 px-3.5 flex items-center gap-3 shadow-2xs focus-within:border-[#7C21A4]">
-            <Landmark className="w-4.5 h-4.5 text-neutral-500 shrink-0" />
-            <input
-              type="text"
-              placeholder="Account Number"
-              value={accountInput}
-              onChange={(e) => setAccountInput(e.target.value)}
-              className="w-full text-xs font-semibold text-neutral-800 outline-none placeholder:text-neutral-400 font-mono"
-            />
-            <button
-              onClick={() => {
-                if (recipientsList.length > 0) handleSelectRecipient(recipientsList[0]);
-              }}
-              className="text-neutral-400 hover:text-neutral-700 p-1 shrink-0"
-              title="Select beneficiary"
-            >
-              <User className="w-4 h-4" />
-            </button>
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400">
+            <Building2 className="w-5 h-5 stroke-[2]" />
           </div>
-
-          {/* Autocomplete Dropdown matching IMG_20261106_230128_179_3a591c87.jpg */}
-          {suggestions.length > 0 && (
-            <div className="absolute top-13 left-0 right-0 bg-white rounded-xl shadow-xl border border-neutral-200 z-50 max-h-48 overflow-y-auto divide-y divide-neutral-100">
-              {suggestions.map((item) => (
-                <div
-                  key={item.accountNumber}
-                  onClick={() => handleSelectRecipient(item)}
-                  className="p-2.5 px-3.5 hover:bg-purple-50 cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-full bg-purple-100 text-[#7C21A4] flex items-center justify-center text-[10px] font-bold">
-                      <Landmark className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-neutral-800">{item.name}</div>
-                      <div className="text-[11px] text-neutral-500 font-mono">
-                        {item.accountNumber}
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
-                </div>
-              ))}
-            </div>
-          )}
+          <input
+            type="text"
+            value={accountInput}
+            onChange={(e) => setAccountInput(e.target.value)}
+            placeholder="Account Number"
+            className="w-full h-[52px] pl-11 pr-11 bg-white rounded-xl border border-neutral-200 text-[14px] text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-[#7C21A4] shadow-2xs font-mono"
+          />
+          <button
+            onClick={() => setActiveTab('beneficiaries')}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-[#7C21A4] transition p-1"
+            title="Contacts / Beneficiaries"
+          >
+            <Users className="w-5 h-5 stroke-[2]" />
+          </button>
         </div>
 
         {/* Amount Input */}
-        <div className="h-12 bg-white rounded-xl border border-neutral-300 px-3.5 flex items-center gap-3 mb-2 shadow-2xs focus-within:border-[#7C21A4]">
-          <Wallet className="w-4.5 h-4.5 text-neutral-500 shrink-0" />
+        <div className="relative mb-2.5">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400">
+            <CreditCard className="w-5 h-5 stroke-[2]" />
+          </div>
           <input
             type="number"
-            placeholder="Amount*"
+            step="any"
             value={amountInput}
             onChange={(e) => setAmountInput(e.target.value)}
-            className="w-full text-xs font-semibold font-mono text-neutral-800 outline-none placeholder:text-neutral-400"
+            placeholder="Amount*"
+            className="w-full h-[52px] pl-11 pr-4 bg-white rounded-xl border border-neutral-200 text-[14px] font-bold text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-[#7C21A4] shadow-2xs font-mono"
           />
-          <Calculator className="w-4.5 h-4.5 text-neutral-400 shrink-0" />
         </div>
 
-        {/* Add Remark */}
-        <div className="my-2 text-xs text-neutral-600 flex items-center gap-2">
-          {isEditingRemark ? (
-            <input
-              type="text"
-              value={remarkInput}
-              onChange={(e) => setRemarkInput(e.target.value)}
-              placeholder="Add remark"
-              className="w-full h-8 px-2 text-xs border border-neutral-300 rounded-md outline-none"
-              autoFocus
-            />
-          ) : (
-            <button
-              onClick={() => setIsEditingRemark(true)}
-              className="flex items-center gap-1.5 text-xs text-neutral-700 hover:text-neutral-900"
-            >
-              <div className="w-4 h-4 rounded-full border border-neutral-400 flex items-center justify-center text-neutral-600">
-                <Plus className="w-3 h-3" />
+        {/* Suggestions Dropdown (if searching) */}
+        {suggestions.length > 0 && (
+          <div className="bg-white rounded-xl border border-neutral-200 shadow-md mb-2.5 overflow-hidden">
+            {suggestions.map((rec) => (
+              <div
+                key={rec.accountNumber}
+                onClick={() => handleSelectRecipient(rec)}
+                className="p-3 hover:bg-neutral-50 active:bg-neutral-100 flex items-center justify-between border-b border-neutral-100 last:border-0 cursor-pointer"
+              >
+                <div>
+                  <div className="text-[13px] font-bold text-neutral-900">{rec.name}</div>
+                  <div className="text-[11px] font-mono text-neutral-500">{rec.accountNumber}</div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-neutral-400" />
               </div>
-              <span>
-                Add remark{' '}
-                <span className="text-[11px] text-neutral-400">
-                  *Default: {remarkInput || 'MB transfer'}
-                </span>
+            ))}
+          </div>
+        )}
+
+        {/* "Add remark" with text "*Default: MB transfer" */}
+        <div className="mb-3 px-1">
+          {isEditingRemark ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={remarkInput}
+                onChange={(e) => setRemarkInput(e.target.value)}
+                placeholder="Enter remark"
+                className="flex-1 h-9 px-3 bg-white rounded-lg border border-neutral-200 text-xs text-neutral-800 focus:outline-none focus:border-[#7C21A4]"
+                autoFocus
+              />
+              <button
+                onClick={() => setIsEditingRemark(false)}
+                className="text-xs font-bold text-[#7C21A4] px-2 py-1"
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => setIsEditingRemark(true)}
+              className="flex items-center gap-1.5 text-xs text-neutral-600 cursor-pointer hover:text-neutral-900"
+            >
+              <div className="w-4 h-4 rounded-full border border-neutral-400 flex items-center justify-center text-neutral-500">
+                <Plus className="w-2.5 h-2.5" />
+              </div>
+              <span className="font-medium">Add remark</span>
+              <span className="text-[11px] text-neutral-400 italic">
+                *{remarkInput ? `"${remarkInput}"` : 'Default: MB transfer'}
               </span>
-            </button>
+            </div>
           )}
         </div>
 
         {errorText && (
-          <div className="p-2 mb-2 bg-red-50 text-red-600 text-xs rounded-lg font-medium border border-red-200">
+          <div className="mb-3 p-2.5 bg-red-50 text-red-600 rounded-xl text-xs font-medium border border-red-200">
             {errorText}
           </div>
         )}
 
-        {/* Continue Button */}
+        {/* Full-width "Continue" button */}
         <button
           onClick={handleContinue}
-          className="w-full h-11 rounded-full bg-[#7C21A4] hover:bg-[#68198a] active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-purple-900/20 transition mt-2 mb-4"
+          disabled={isProcessingTransfer}
+          className="w-full h-[48px] rounded-full bg-[#7C21A4] hover:bg-[#6a1b8c] active:scale-[0.99] text-white font-bold text-[15px] shadow-md shadow-purple-900/20 transition flex items-center justify-center mb-5"
         >
-          Continue
+          <span>Continue</span>
         </button>
 
-        {/* Tabs: Recent Transfers / Beneficiaries */}
-        <div className="flex items-center gap-8 border-b border-neutral-200 pb-2 mb-3 text-xs font-bold">
+        {/* Tabs: "Recent Transfers | Beneficiaries" */}
+        <div className="flex items-center border-b border-neutral-200 mb-3 px-1">
           <button
             onClick={() => setActiveTab('recent')}
-            className={`relative pb-1.5 transition ${
-              activeTab === 'recent' ? 'text-neutral-900' : 'text-neutral-400'
+            className={`pb-2 mr-6 text-[13px] font-bold transition relative ${
+              activeTab === 'recent'
+                ? 'text-[#7C21A4] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7C21A4] after:rounded-full'
+                : 'text-neutral-500 font-medium hover:text-neutral-800'
             }`}
           >
-            <span>Recent Transfers</span>
-            {activeTab === 'recent' && (
-              <span className="absolute bottom-[-9px] left-0 right-0 h-[2px] bg-[#7C21A4]"></span>
-            )}
+            Recent Transfers
           </button>
-
           <button
             onClick={() => setActiveTab('beneficiaries')}
-            className={`relative pb-1.5 transition ${
-              activeTab === 'beneficiaries' ? 'text-neutral-900' : 'text-neutral-400'
+            className={`pb-2 text-[13px] font-bold transition relative ${
+              activeTab === 'beneficiaries'
+                ? 'text-[#7C21A4] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7C21A4] after:rounded-full'
+                : 'text-neutral-500 font-medium hover:text-neutral-800'
             }`}
           >
-            <span>Beneficiaries</span>
-            {activeTab === 'beneficiaries' && (
-              <span className="absolute bottom-[-9px] left-0 right-0 h-[2px] bg-[#7C21A4]"></span>
-            )}
+            Beneficiaries
           </button>
         </div>
 
-        {/* Beneficiaries List */}
-        <div className="divide-y divide-neutral-100">
+        {/* Rows: initials avatar, name, masked account, trash icon and chevron */}
+        <div className="space-y-2">
           {recipientsList.map((rec) => (
             <div
               key={rec.accountNumber}
               onClick={() => handleSelectRecipient(rec)}
-              className="py-2.5 flex items-center justify-between cursor-pointer hover:bg-neutral-50 px-1 rounded-xl transition"
+              className="bg-white rounded-xl p-3 flex items-center justify-between shadow-2xs border border-neutral-200/60 hover:border-[#7C21A4]/30 active:scale-[0.99] transition cursor-pointer"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#f2e6f7] text-[#7C21A4] font-bold text-xs flex items-center justify-center shrink-0">
+              {/* Initials Avatar + Name + Masked Account */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-[#ebd5f5] text-[#7C21A4] font-bold text-xs flex items-center justify-center shrink-0 border border-[#7C21A4]/15">
                   {rec.initials}
                 </div>
-                <div>
-                  <h4 className="text-[13px] font-bold text-neutral-800 leading-tight">
+                <div className="min-w-0">
+                  <div className="text-[13px] font-bold text-neutral-900 truncate leading-tight">
                     {rec.name}
-                  </h4>
-                  <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                  </div>
+                  <div className="text-[11px] font-mono text-neutral-500 mt-0.5 leading-tight">
                     {rec.masked}
-                  </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 text-neutral-400">
+              {/* Trash Icon + Chevron */}
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={(e) => handleDelete(e, rec.accountNumber)}
-                  className="p-1 hover:text-red-500 transition"
-                  title="Remove Beneficiary"
-                  aria-label={`Remove beneficiary ${rec.name}`}
+                  className="p-1.5 text-neutral-400 hover:text-red-500 active:scale-90 transition rounded-lg"
+                  title="Remove beneficiary"
+                  aria-label="Remove recipient"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 text-neutral-400" />
               </div>
             </div>
           ))}
         </div>
       </div>
-
-      {/* 360° Circular Rotating Purple Loader Overlay matching IMG_20261106_230128_031_6cb96595.jpg */}
-      {isProcessingTransfer && (
-        <div className="absolute inset-0 bg-black/40 z-50 flex items-center justify-center animate-in fade-in duration-150">
-          <div className="w-20 h-20 rounded-full border-4 border-white/30 border-t-[#7C21A4] border-r-[#9b34cb] animate-spin"></div>
-        </div>
-      )}
     </div>
   );
 };

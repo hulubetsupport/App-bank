@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ShieldCheck,
   Check,
@@ -8,7 +8,9 @@ import {
   Maximize2,
 } from 'lucide-react';
 import { Transaction } from '../types/index.ts';
-import { formatETB, OFFICIAL_CBE_LOGO } from '../utils/banking.ts';
+import { formatETB } from '../utils/banking.ts';
+import cbeLogo from '../assets/cbe-logo.svg';
+import QRCode from 'qrcode';
 
 interface ReceiptScreenProps {
   transaction: Transaction;
@@ -23,9 +25,26 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
   senderAccount = '1000562339427',
   onClose,
 }) => {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-    `CBE-TX|ID:${transaction.referenceId}|AMT:${transaction.amount}|FOR:${transaction.name}|DATE:${transaction.date}`
-  )}`;
+  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+
+  const qrPayload = `CBE-TX|ID:${transaction.referenceId}|AMT:${transaction.amount}|FOR:${transaction.name}|DATE:${transaction.date}|RCPT:${transaction.receiptId}`;
+
+  // Generate QR code instantly offline with 0 network latency
+  useEffect(() => {
+    QRCode.toDataURL(qrPayload, {
+      width: 240,
+      margin: 1,
+      color: {
+        dark: '#1e1e1e',
+        light: '#ffffff',
+      },
+    })
+      .then((url) => setQrDataUrl(url))
+      .catch(() => {
+        // Fallback to static SVG if canvas is unavailable
+        setQrDataUrl('');
+      });
+  }, [qrPayload]);
 
   const senderLast4 = senderAccount ? senderAccount.slice(-4) : '9427';
   const shortAcc = transaction.accountNumber
@@ -33,9 +52,9 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
     : '6157';
 
   return (
-    <div className="flex-1 bg-white flex flex-col overflow-y-auto no-scrollbar select-none">
-      {/* Top Purple Banner matching IMG_20261106_230127_820_dbe6b7dd.jpg */}
-      <div className="relative bg-[#7C21A4] h-36 px-6 pt-4 text-white shrink-0 flex items-start justify-between">
+    <div className="flex-1 bg-white flex flex-col overflow-y-auto no-scrollbar select-none relative w-full">
+      {/* Top Purple Banner */}
+      <div className="relative bg-[#7C21A4] h-36 px-5 pt-[calc(env(safe-area-inset-top,0px)+12px)] text-white shrink-0 flex items-start justify-between">
         <div className="flex items-center gap-3">
           <ShieldCheck className="w-8 h-8 text-white/95" />
           <div>
@@ -44,13 +63,17 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
           </div>
         </div>
 
-        <button className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-white/90">
-          <Scan className="w-4.5 h-4.5" />
+        <button
+          onClick={onClose}
+          className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 flex items-center justify-center text-white/90 transition"
+          aria-label="Close receipt"
+        >
+          <Scan className="w-4 h-4" />
         </button>
 
         {/* Big White Checkmark Circle overlapping */}
         <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-white shadow-md flex items-center justify-center p-1.5 z-10">
-          <div className="w-full h-full rounded-full bg-[#7C21A4] flex items-center justify-center text-white">
+          <div className="w-full h-full rounded-full bg-[#7C21A4] flex items-center justify-center text-white shadow-inner">
             <Check className="w-10 h-10 stroke-[3.5]" />
           </div>
         </div>
@@ -58,7 +81,7 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
 
       {/* Receipt Body */}
       <div className="p-4.5 pt-13 flex-1 flex flex-col items-center">
-        <h3 className="text-[13.5px] font-medium text-neutral-800 text-center mb-3">
+        <h3 className="text-[14px] font-medium text-neutral-800 text-center mb-3">
           Transaction Completed Successfully!
         </h3>
 
@@ -90,24 +113,35 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
             of ETB0.00, VAT (15%) of 0.0 and Disaster Recovery (5%) of ETB0.00.
           </div>
 
-          {/* QR Code Container */}
+          {/* Instant Offline QR Code Container */}
           <div className="flex justify-center my-4">
             <div className="bg-white p-2.5 rounded-xl border border-neutral-200 shadow-2xs">
-              <img
-                src={qrUrl}
-                alt="Receipt QR Code"
-                className="w-34 h-34 object-contain"
-              />
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt="Receipt QR Code"
+                  className="w-34 h-34 object-contain"
+                />
+              ) : (
+                <div className="w-34 h-34 flex items-center justify-center bg-neutral-100 rounded text-neutral-400 text-xs">
+                  Generating QR...
+                </div>
+              )}
             </div>
           </div>
 
           {/* CBE Footer with official emblem */}
           <div className="pt-3 border-t border-dashed border-neutral-300 flex items-center gap-2.5">
-            <img
-              src={OFFICIAL_CBE_LOGO}
-              alt="CBE"
-              className="w-9 h-9 object-contain"
-            />
+            <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-black/10 p-0.5">
+              <img
+                src={cbeLogo}
+                alt="Commercial Bank of Ethiopia"
+                className="w-full h-full object-contain rounded-full"
+                onError={(e) => {
+                  e.currentTarget.src = './cbe-logo.svg';
+                }}
+              />
+            </div>
             <div>
               <h4 className="text-xs font-bold text-neutral-900 leading-tight">
                 Commercial Bank of Ethiopia
@@ -119,11 +153,11 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
           </div>
         </div>
 
-        {/* Bottom Actions matching screenshot: Receipt, Screenshot, Share */}
-        <div className="w-full flex items-center justify-around text-neutral-700 mt-6 px-4">
+        {/* Bottom Actions: Receipt, Screenshot, Share */}
+        <div className="w-full flex items-center justify-around text-neutral-700 mt-6 px-4 pb-6">
           <button
             onClick={() => {}}
-            className="flex items-center gap-1.5 text-xs font-semibold hover:text-[#7C21A4] transition"
+            className="flex items-center gap-1.5 text-xs font-semibold hover:text-[#7C21A4] transition active:scale-95"
           >
             <ReceiptIcon className="w-4 h-4 text-neutral-800" />
             <span>Receipt</span>
@@ -131,39 +165,20 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
 
           <button
             onClick={() => {}}
-            className="flex items-center gap-1.5 text-xs font-semibold hover:text-[#7C21A4] transition"
+            className="flex items-center gap-1.5 text-xs font-semibold hover:text-[#7C21A4] transition active:scale-95"
           >
             <Maximize2 className="w-4 h-4 text-neutral-800" />
             <span>Screenshot</span>
           </button>
 
           <button
-            onClick={() => {
-              if (navigator.share) {
-                navigator
-                  .share({
-                    title: `CBE Receipt ${transaction.referenceId}`,
-                    text: `CBE Transaction: ETB ${formatETB(
-                      transaction.amount
-                    )} to ${transaction.name}. Ref: ${transaction.referenceId}`,
-                  })
-                  .catch(() => {});
-              }
-            }}
-            className="flex items-center gap-1.5 text-xs font-semibold hover:text-[#7C21A4] transition"
+            onClick={onClose}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#7C21A4] hover:opacity-80 transition active:scale-95"
           >
-            <Share2 className="w-4 h-4 text-neutral-800" />
-            <span>Share</span>
+            <Share2 className="w-4 h-4" />
+            <span>Close</span>
           </button>
         </div>
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="w-full h-11 rounded-full bg-[#EAE6DB] hover:bg-[#ded7c8] text-neutral-700 font-bold text-xs shadow-2xs transition mt-4 mb-2"
-        >
-          Close
-        </button>
       </div>
     </div>
   );

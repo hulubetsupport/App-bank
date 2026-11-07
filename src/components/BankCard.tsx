@@ -1,6 +1,7 @@
 import React from 'react';
 import { Eye, EyeOff, Copy, Check } from 'lucide-react';
-import { formatETB, OFFICIAL_CBE_LOGO } from '../utils/banking.ts';
+import { formatETB } from '../utils/banking.ts';
+import cbeLogo from '../assets/cbe-logo.svg';
 
 interface BankCardProps {
   balance: number;
@@ -23,85 +24,84 @@ export const BankCard: React.FC<BankCardProps> = ({
   onCopyAccount,
   copied,
 }) => {
-  // Format masked representation: e.g. "1 **** 9427" matching screenshot IMG_20261106_230128_031_6cb96595.jpg
+  // Masked format: "1 **** 9427"
   const maskedDisplay =
     accountNumber.length > 4
       ? `${accountNumber.charAt(0)} **** ${accountNumber.slice(-4)}`
       : accountNumber;
 
   return (
-    <div className="px-4 mt-1 z-10 shrink-0 select-none">
-      <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#2c3b4e] via-[#222e3d] to-[#18222d] text-[#dfba6c] p-4.5 pt-4 shadow-xl border border-white/10">
-        {/* Authentic CBE subtle curved watermark & geometric guilloche pattern */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none overflow-hidden">
+    <div className="mx-4 z-10 shrink-0 select-none">
+      <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-[#2c3b4e] via-[#222e3d] to-[#18222d] text-[#dfba6c] p-3.5 shadow-xl border border-white/10 min-h-[130px] flex flex-col justify-between">
+        {/* Subtle authentic CBE curved watermark guilloche pattern */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
           <svg
             className="w-full h-full"
-            viewBox="0 0 360 180"
+            viewBox="0 0 360 140"
             fill="none"
             preserveAspectRatio="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M-20,150 C70,90 150,210 270,110 C330,60 370,100 410,70"
+              d="M-20,130 C70,70 150,190 270,90 C330,40 370,80 410,50"
               stroke="#dfba6c"
               strokeWidth="1.2"
               fill="none"
             />
             <path
-              d="M-20,120 C80,60 160,180 280,80 C340,30 380,70 420,40"
+              d="M-20,100 C80,40 160,160 280,60 C340,10 380,50 420,20"
               stroke="#dfba6c"
               strokeWidth="1"
               fill="none"
             />
-            <path
-              d="M-20,180 C60,120 140,240 260,140 C320,90 360,130 400,100"
-              stroke="#dfba6c"
-              strokeWidth="0.8"
-              fill="none"
-            />
             {/* Concentric spiral rings representing CBE logo rays */}
-            <circle cx="310" cy="50" r="85" stroke="#dfba6c" strokeWidth="0.8" opacity="0.3" />
-            <circle cx="310" cy="50" r="65" stroke="#dfba6c" strokeWidth="0.8" opacity="0.25" />
-            <circle cx="310" cy="50" r="45" stroke="#dfba6c" strokeWidth="0.8" opacity="0.2" />
-            <circle cx="310" cy="50" r="25" stroke="#dfba6c" strokeWidth="0.8" opacity="0.15" />
+            <circle cx="320" cy="40" r="75" stroke="#dfba6c" strokeWidth="0.8" opacity="0.35" />
+            <circle cx="320" cy="40" r="55" stroke="#dfba6c" strokeWidth="0.8" opacity="0.3" />
+            <circle cx="320" cy="40" r="35" stroke="#dfba6c" strokeWidth="0.8" opacity="0.2" />
           </svg>
         </div>
 
-        {/* Card Header */}
+        {/* 1. Header: Round 44px CBE logo + Bank name + Tagline */}
         <div className="relative flex items-center gap-3">
-          <img
-            src={OFFICIAL_CBE_LOGO}
-            alt="Commercial Bank of Ethiopia"
-            className="w-10 h-10 object-contain shrink-0 drop-shadow-md"
-          />
-          <div>
-            <h3 className="text-[13.5px] font-bold text-[#dfba6c] tracking-wide leading-tight">
+          <div className="w-[44px] h-[44px] rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-black/20 p-0.5 border border-[#dfba6c]/30 shadow-inner">
+            <img
+              src={cbeLogo}
+              alt="Commercial Bank of Ethiopia"
+              className="w-full h-full object-contain rounded-full"
+              onError={(e) => {
+                // Fallback to local svg path if bundler alias differs
+                e.currentTarget.src = './cbe-logo.svg';
+              }}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[15px] font-bold text-[#dfba6c] tracking-tight leading-tight truncate">
               Commercial Bank of Ethiopia
             </h3>
-            <p className="text-[10px] text-[#baa069] mt-0.5 font-light">
+            <p className="text-[10px] text-[#baa069] mt-0.5 font-mono leading-none tracking-normal">
               The bank you can always rely on!
             </p>
           </div>
         </div>
 
-        {/* Balance Row with bold font & synchronized eye toggle */}
-        <div className="relative my-3 flex items-center justify-center">
+        {/* 2. Big Balance (32px bold) + small "ETB" + Eye toggle on right */}
+        <div className="relative my-1.5 flex items-center justify-center">
           <div className="flex items-baseline gap-1.5 text-center">
             {isMasked ? (
-              <span className="text-2xl font-black tracking-[4px] text-white font-mono">
+              <span className="text-[30px] font-bold tracking-[4px] text-white font-mono leading-none">
                 ******
               </span>
             ) : (
-              <span className="text-[27px] font-black tracking-tight text-white font-mono drop-shadow-sm">
+              <span className="text-[32px] font-bold tracking-tight text-white leading-none drop-shadow-sm font-sans">
                 {formatETB(balance)}
               </span>
             )}
-            <span className="text-xs font-bold text-[#dfba6c] ml-1">ETB</span>
+            <span className="text-[13px] font-bold text-[#dfba6c] ml-1">ETB</span>
           </div>
 
           <button
             onClick={onToggleMask}
-            className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-neutral-300 hover:text-white transition"
+            className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-neutral-300 hover:text-white transition active:scale-90"
             aria-label={isMasked ? 'Reveal balance & account' : 'Hide balance & account'}
           >
             {isMasked ? (
@@ -112,15 +112,15 @@ export const BankCard: React.FC<BankCardProps> = ({
           </button>
         </div>
 
-        {/* Account Row: Reveals along with balance when unmasked */}
-        <div className="relative flex items-center justify-center gap-2 text-xs text-[#d8cfa8] tracking-wide">
+        {/* 3. Account row: "Wadiah Ordinary 1 **** 9427" (or full when unmasked) + copy icon */}
+        <div className="relative flex items-center justify-center gap-2 text-[12px] text-[#d8cfa8]">
           <span className="font-medium">{accountName}</span>
-          <span className="font-mono font-bold tracking-wider">
+          <span className="font-mono font-semibold tracking-wider">
             {isMasked ? maskedDisplay : accountNumber}
           </span>
           <button
             onClick={onCopyAccount}
-            className="p-1 hover:text-white transition text-neutral-300"
+            className="p-1 hover:text-white transition text-neutral-300 active:scale-90"
             title="Copy Account Number"
             aria-label="Copy account number"
           >
@@ -132,8 +132,8 @@ export const BankCard: React.FC<BankCardProps> = ({
           </button>
         </div>
 
-        {/* Timestamp */}
-        <div className="relative text-center text-[10px] text-[#8e989b] mt-2 font-mono">
+        {/* 4. Small centered date/time at the bottom */}
+        <div className="relative text-center text-[10px] text-[#8e989b] font-mono leading-tight mt-1">
           {lastUpdated}
         </div>
       </div>

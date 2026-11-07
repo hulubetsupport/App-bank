@@ -38,6 +38,12 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
   const [filter, setFilter] = useState<'all' | TxType>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => setIsRefreshing(false), 400);
+  };
 
   const filteredTransactions = transactions.filter((tx) => {
     if (filter !== 'all' && tx.type !== filter) return false;
@@ -54,15 +60,15 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
   });
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-[#F5F3EC] select-none">
-      {/* Header */}
-      <div className="bg-[#7C21A4] px-4.5 pt-2 pb-3 text-white shrink-0">
+    <div className="flex-1 flex flex-col overflow-hidden bg-[#F5F3EC] select-none relative w-full">
+      {/* Header (same as Home: purple, rounded bottom) */}
+      <header className="bg-[#7C21A4] px-4 pt-[calc(env(safe-area-inset-top,0px)+8px)] pb-14 text-white shrink-0 rounded-b-[24px]">
         <div className="flex items-center justify-between">
           <div
             onClick={onOpenSettings}
-            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition"
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition active:scale-98"
           >
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
               <div className="grid grid-cols-2 gap-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
                 <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
@@ -70,9 +76,9 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
                 <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
               </div>
             </div>
-            <div>
-              <div className="text-[10.5px] text-purple-200 leading-none">Hello,</div>
-              <div className="text-[15px] font-bold tracking-tight leading-tight mt-0.5">
+            <div className="leading-tight">
+              <div className="text-[12px] text-purple-200">Hello,</div>
+              <div className="text-[16px] font-bold tracking-tight text-white">
                 {userName.split(' ')[0]}
               </div>
             </div>
@@ -81,170 +87,177 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onToggleLanguage}
-              className="px-2.5 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-medium flex items-center gap-1 transition"
+              className="px-2.5 py-1 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 text-white text-[12px] font-medium flex items-center gap-1 transition"
             >
               <span>{language}</span>
               <span className="text-[9px]">▾</span>
             </button>
 
             <button
-              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition"
+              onClick={handleRefresh}
+              className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 active:scale-95 text-white flex items-center justify-center transition"
               aria-label="Refresh transactions"
             >
-              <RefreshCw className="w-4 h-4 stroke-[2.2]" />
+              <RefreshCw
+                className={`w-4 h-4 stroke-[2.2] ${isRefreshing ? 'animate-spin' : ''}`}
+              />
             </button>
 
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`w-8 h-8 rounded-full ${
                 isSearchOpen ? 'bg-white text-[#7C21A4]' : 'bg-white/20 text-white'
-              } flex items-center justify-center transition`}
+              } flex items-center justify-center transition active:scale-95`}
               aria-label="Toggle search transactions"
             >
               <Search className="w-4 h-4 stroke-[2.2]" />
             </button>
           </div>
         </div>
+      </header>
+
+      {/* Card overlaps header by about half */}
+      <div className="-mt-11 z-10 shrink-0">
+        <BankCard
+          balance={balance}
+          isMasked={isBalanceMasked}
+          onToggleMask={onToggleMask}
+          accountName={accountName}
+          accountNumber={accountNumber}
+          lastUpdated="06-Nov-26 10:52 PM"
+          onCopyAccount={onCopyAccount}
+          copied={copied}
+        />
       </div>
 
-      {/* CBE Black Bank Card */}
-      <BankCard
-        balance={balance}
-        isMasked={isBalanceMasked}
-        onToggleMask={onToggleMask}
-        accountName={accountName}
-        accountNumber={accountNumber}
-        lastUpdated="06 Nov 2026 • 10:52 PM"
-        onCopyAccount={onCopyAccount}
-        copied={copied}
-      />
-
-      {/* Transaction List Sheet */}
-      <div className="flex-1 bg-[#F5F3EC] rounded-t-[28px] mt-2 px-4 pt-3 pb-24 overflow-y-auto no-scrollbar shadow-inner">
-        <div className="w-9 h-1 rounded-full bg-[#d9c8b4] mx-auto mb-3"></div>
-
-        {/* Filter bar */}
-        <div className="flex items-center justify-between border-b border-[#ded9cc] pb-2 mb-3">
-          <div className="flex items-center gap-6 text-[13px] font-bold">
-            <button
-              onClick={() => setFilter('all')}
-              className={`relative pb-1.5 transition ${
-                filter === 'all' ? 'text-neutral-900' : 'text-neutral-400'
-              }`}
-            >
-              <span>All</span>
-              {filter === 'all' && (
-                <span className="absolute bottom-[-9px] left-0 right-0 h-[2.5px] bg-[#7C21A4] rounded-full"></span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setFilter('debited')}
-              className={`relative pb-1.5 transition ${
-                filter === 'debited' ? 'text-neutral-900' : 'text-neutral-400'
-              }`}
-            >
-              <span>Debited</span>
-              {filter === 'debited' && (
-                <span className="absolute bottom-[-9px] left-0 right-0 h-[2.5px] bg-[#7C21A4] rounded-full"></span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setFilter('credited')}
-              className={`relative pb-1.5 transition ${
-                filter === 'credited' ? 'text-neutral-900' : 'text-neutral-400'
-              }`}
-            >
-              <span>Credited</span>
-              {filter === 'credited' && (
-                <span className="absolute bottom-[-9px] left-0 right-0 h-[2.5px] bg-[#7C21A4] rounded-full"></span>
-              )}
-            </button>
-          </div>
-
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="text-neutral-500 hover:text-neutral-900 p-1"
-            aria-label="Filter search"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Search Input Bar if opened */}
+      {/* Transactions Container */}
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pt-3 pb-24">
+        {/* Search input if active */}
         {isSearchOpen && (
-          <div className="mb-3 flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-neutral-300 shadow-2xs animate-in fade-in">
-            <Search className="w-4 h-4 text-neutral-400 shrink-0" />
+          <div className="mb-3 relative">
             <input
               type="text"
-              placeholder="Search by name, reference ID, amount..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs bg-transparent outline-none text-neutral-800 placeholder:text-neutral-400"
+              placeholder="Search by recipient, remark, or amount..."
+              className="w-full h-10 pl-9 pr-9 bg-white rounded-xl border border-neutral-200 text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-[#7C21A4]"
               autoFocus
             />
+            <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-3" />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="text-neutral-400">
-                <X className="w-3.5 h-3.5" />
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-3 text-neutral-400 hover:text-neutral-600"
+              >
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
         )}
 
+        {/* Tabs: All | Debited | Credited with a search icon on right */}
+        <div className="flex items-center justify-between border-b border-neutral-200/80 pb-2 mb-3 px-1">
+          <div className="flex items-center gap-6 text-[13px] font-bold">
+            <button
+              onClick={() => setFilter('all')}
+              className={`relative py-1 transition ${
+                filter === 'all'
+                  ? 'text-[#7C21A4] font-bold after:absolute after:bottom-[-9px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7C21A4] after:rounded-full'
+                  : 'text-neutral-500 font-medium hover:text-neutral-800'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilter('debited')}
+              className={`relative py-1 transition ${
+                filter === 'debited'
+                  ? 'text-[#7C21A4] font-bold after:absolute after:bottom-[-9px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7C21A4] after:rounded-full'
+                  : 'text-neutral-500 font-medium hover:text-neutral-800'
+              }`}
+            >
+              Debited
+            </button>
+            <button
+              onClick={() => setFilter('credited')}
+              className={`relative py-1 transition ${
+                filter === 'credited'
+                  ? 'text-[#7C21A4] font-bold after:absolute after:bottom-[-9px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7C21A4] after:rounded-full'
+                  : 'text-neutral-500 font-medium hover:text-neutral-800'
+              }`}
+            >
+              Credited
+            </button>
+          </div>
+
+          <button
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            className="p-1 text-neutral-500 hover:text-[#7C21A4] transition active:scale-90"
+            aria-label="Search filter"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+        </div>
+
         {/* Transactions List */}
         <div className="space-y-2">
-          {filteredTransactions.map((tx) => {
-            const isCredit = tx.type === 'credited';
-            return (
-              <div
-                key={tx.id}
-                onClick={() => onSelectTransaction(tx)}
-                className="bg-white rounded-2xl p-3 flex items-center justify-between shadow-2xs hover:shadow-xs transition cursor-pointer active:scale-[0.99] border border-neutral-100"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                      isCredit
-                        ? 'bg-emerald-50 text-emerald-600'
-                        : 'bg-red-50 text-red-600'
-                    }`}
-                  >
-                    {isCredit ? (
-                      <ArrowDownLeft className="w-4.5 h-4.5 stroke-[2.2]" />
-                    ) : (
-                      <ArrowUpRight className="w-4.5 h-4.5 stroke-[2.2]" />
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="text-[13px] font-bold text-neutral-900 leading-tight">
-                      {tx.name}
-                    </h4>
-                    <p className="text-[10.5px] text-neutral-400 mt-0.5">{tx.date}</p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div
-                    className={`text-[13.5px] font-extrabold font-mono tracking-tight leading-tight ${
-                      isCredit ? 'text-emerald-700' : 'text-red-600'
-                    }`}
-                  >
-                    {isCredit ? '+' : '-'}
-                    {formatETB(tx.amount)} ETB
-                  </div>
-                  <div className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase mt-1">
-                    {tx.category}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {filteredTransactions.length === 0 && (
+          {filteredTransactions.length === 0 ? (
             <div className="text-center py-12 text-neutral-400 text-xs">
-              No transactions found matching your criteria.
+              No transactions found
             </div>
+          ) : (
+            filteredTransactions.map((tx) => {
+              const isCredit = tx.type === 'credited';
+
+              return (
+                <div
+                  key={tx.id}
+                  onClick={() => onSelectTransaction(tx)}
+                  className="bg-white rounded-xl p-3 flex items-center justify-between shadow-2xs border border-neutral-200/60 hover:border-[#7C21A4]/30 active:scale-[0.99] transition cursor-pointer"
+                >
+                  {/* Left: Circle Arrow + Bold Name + Small Date */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                        isCredit
+                          ? 'bg-emerald-50 text-emerald-600'
+                          : 'bg-red-50 text-red-600'
+                      }`}
+                    >
+                      {isCredit ? (
+                        <ArrowDownLeft className="w-5 h-5 stroke-[2.5]" />
+                      ) : (
+                        <ArrowUpRight className="w-5 h-5 stroke-[2.5]" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="text-[14px] font-bold text-neutral-900 truncate leading-tight">
+                        {tx.name}
+                      </div>
+                      <div className="text-[12px] text-neutral-500 mt-0.5 leading-tight">
+                        {tx.date}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Amount (+5,000.00 ETB or -850.00 ETB) + Small caps category tag */}
+                  <div className="text-right shrink-0 ml-2">
+                    <div
+                      className={`text-[14px] font-bold font-mono leading-tight ${
+                        isCredit ? 'text-emerald-600' : 'text-neutral-900'
+                      }`}
+                    >
+                      {isCredit ? '+' : '-'}
+                      {formatETB(tx.amount)} ETB
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider font-semibold text-neutral-400 mt-0.5">
+                      {tx.category}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
       </div>

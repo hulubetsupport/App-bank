@@ -316,22 +316,22 @@ export default function App() {
             />
           )}
 
-          {/* Bottom Navigation Bar */}
+          {/* Bottom Navigation Bar: 56px height plus safe area, rounded pill behind active icon */}
           {currentScreen !== 'receipt' && (
-            <nav className="absolute bottom-0 left-0 right-0 h-15 bg-[#F5F3EC] border-t border-[#ded9cc] flex items-center justify-around z-20">
+            <nav className="absolute bottom-0 left-0 right-0 h-[56px] pb-[env(safe-area-inset-bottom,0px)] bg-[#F5F3EC] border-t border-[#ded9cc] flex items-center justify-around z-20 shrink-0">
               <button
                 onClick={() => {
                   setCurrentScreen('home');
                   setActiveBottomTab('home');
                 }}
-                className={`flex flex-col items-center gap-0.5 text-[11px] font-bold transition min-w-[70px] ${
+                className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition min-w-[74px] ${
                   activeBottomTab === 'home' && currentScreen === 'home'
                     ? 'text-[#7C21A4]'
                     : 'text-neutral-500 hover:text-neutral-800'
                 }`}
               >
                 <div
-                  className={`px-3.5 py-1 rounded-full transition ${
+                  className={`px-4 py-1 rounded-full transition ${
                     activeBottomTab === 'home' && currentScreen === 'home'
                       ? 'bg-[#e9dec9]'
                       : 'bg-transparent'
@@ -339,7 +339,7 @@ export default function App() {
                 >
                   <Home className="w-5 h-5" />
                 </div>
-                <span>Home</span>
+                <span className="leading-none">Home</span>
               </button>
 
               <button
@@ -347,14 +347,14 @@ export default function App() {
                   setCurrentScreen('transactions');
                   setActiveBottomTab('transactions');
                 }}
-                className={`flex flex-col items-center gap-0.5 text-[11px] font-bold transition min-w-[70px] ${
+                className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition min-w-[74px] ${
                   activeBottomTab === 'transactions' && currentScreen === 'transactions'
                     ? 'text-[#7C21A4]'
                     : 'text-neutral-500 hover:text-neutral-800'
                 }`}
               >
                 <div
-                  className={`px-3.5 py-1 rounded-full transition ${
+                  className={`px-4 py-1 rounded-full transition ${
                     activeBottomTab === 'transactions' && currentScreen === 'transactions'
                       ? 'bg-[#e9dec9]'
                       : 'bg-transparent'
@@ -362,21 +362,25 @@ export default function App() {
                 >
                   <Landmark className="w-5 h-5" />
                 </div>
-                <span>Transactions</span>
+                <span className="leading-none">Transactions</span>
               </button>
 
               <button
                 onClick={() => setIsSettingsModalOpen(true)}
-                className={`flex flex-col items-center gap-0.5 text-[11px] font-bold transition min-w-[70px] ${
+                className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition min-w-[74px] ${
                   isSettingsModalOpen
                     ? 'text-[#7C21A4]'
                     : 'text-neutral-500 hover:text-neutral-800'
                 }`}
               >
-                <div className="px-3.5 py-1 rounded-full transition bg-transparent">
+                <div
+                  className={`px-4 py-1 rounded-full transition ${
+                    isSettingsModalOpen ? 'bg-[#e9dec9]' : 'bg-transparent'
+                  }`}
+                >
                   <Settings className="w-5 h-5" />
                 </div>
-                <span>Settings</span>
+                <span className="leading-none">Settings</span>
               </button>
             </nav>
           )}
