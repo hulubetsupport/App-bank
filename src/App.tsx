@@ -246,7 +246,7 @@ export default function App() {
           pinLength={pinLength}
         />
       ) : (
-        <div className="flex-1 flex flex-col relative overflow-hidden select-none">
+        <div className="flex-1 flex flex-col relative overflow-hidden select-none bg-[#F7F7F9]">
           {currentScreen === 'home' && (
             <HomeScreen
               balance={balance}
@@ -316,72 +316,74 @@ export default function App() {
             />
           )}
 
-          {/* Bottom Navigation Bar: 56px height plus safe area, rounded pill behind active icon */}
+          {/* Bottom Navigation Bar: White background, #ECECEF border, #7B1FA2 active icon, #F3EBDD active pill */}
           {currentScreen !== 'receipt' && (
-            <nav className="absolute bottom-0 left-0 right-0 h-[56px] pb-[env(safe-area-inset-bottom,0px)] bg-[#F5F3EC] border-t border-[#ded9cc] flex items-center justify-around z-20 shrink-0">
-              <button
-                onClick={() => {
-                  setCurrentScreen('home');
-                  setActiveBottomTab('home');
-                }}
-                className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition min-w-[74px] ${
-                  activeBottomTab === 'home' && currentScreen === 'home'
-                    ? 'text-[#7C21A4]'
-                    : 'text-neutral-500 hover:text-neutral-800'
-                }`}
-              >
-                <div
-                  className={`px-4 py-1 rounded-full transition ${
+            <nav className="absolute bottom-0 left-0 right-0 h-[58px] phone:h-[64px] pb-[env(safe-area-inset-bottom,0px)] bg-white border-t border-[#ECECEF] shadow-[0_-2px_10px_rgba(0,0,0,0.02)] flex items-center justify-around z-20 shrink-0">
+              <div className="w-full max-w-[500px] mx-auto flex items-center justify-around">
+                <button
+                  onClick={() => {
+                    setCurrentScreen('home');
+                    setActiveBottomTab('home');
+                  }}
+                  className={`flex flex-col items-center justify-center gap-0.5 text-[11px] phone:text-[12px] font-bold transition min-w-[74px] phone:min-w-[88px] ${
                     activeBottomTab === 'home' && currentScreen === 'home'
-                      ? 'bg-[#e9dec9]'
-                      : 'bg-transparent'
+                      ? 'text-[#7B1FA2]'
+                      : 'text-[#96939A] hover:text-[#29212E]'
                   }`}
                 >
-                  <Home className="w-5 h-5" />
-                </div>
-                <span className="leading-none">Home</span>
-              </button>
+                  <div
+                    className={`px-4 phone:px-5 py-1 phone:py-1.5 rounded-full transition ${
+                      activeBottomTab === 'home' && currentScreen === 'home'
+                        ? 'bg-[#F3EBDD]'
+                        : 'bg-transparent'
+                    }`}
+                  >
+                    <Home className="w-5 h-5 phone:w-5.5 phone:h-5.5 stroke-[2]" />
+                  </div>
+                  <span className="leading-none">Home</span>
+                </button>
 
-              <button
-                onClick={() => {
-                  setCurrentScreen('transactions');
-                  setActiveBottomTab('transactions');
-                }}
-                className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition min-w-[74px] ${
-                  activeBottomTab === 'transactions' && currentScreen === 'transactions'
-                    ? 'text-[#7C21A4]'
-                    : 'text-neutral-500 hover:text-neutral-800'
-                }`}
-              >
-                <div
-                  className={`px-4 py-1 rounded-full transition ${
+                <button
+                  onClick={() => {
+                    setCurrentScreen('transactions');
+                    setActiveBottomTab('transactions');
+                  }}
+                  className={`flex flex-col items-center justify-center gap-0.5 text-[11px] phone:text-[12px] font-bold transition min-w-[74px] phone:min-w-[88px] ${
                     activeBottomTab === 'transactions' && currentScreen === 'transactions'
-                      ? 'bg-[#e9dec9]'
-                      : 'bg-transparent'
+                      ? 'text-[#7B1FA2]'
+                      : 'text-[#96939A] hover:text-[#29212E]'
                   }`}
                 >
-                  <Landmark className="w-5 h-5" />
-                </div>
-                <span className="leading-none">Transactions</span>
-              </button>
+                  <div
+                    className={`px-4 phone:px-5 py-1 phone:py-1.5 rounded-full transition ${
+                      activeBottomTab === 'transactions' && currentScreen === 'transactions'
+                        ? 'bg-[#F3EBDD]'
+                        : 'bg-transparent'
+                    }`}
+                  >
+                    <Landmark className="w-5 h-5 phone:w-5.5 phone:h-5.5 stroke-[2]" />
+                  </div>
+                  <span className="leading-none">Transactions</span>
+                </button>
 
-              <button
-                onClick={() => setIsSettingsModalOpen(true)}
-                className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition min-w-[74px] ${
-                  isSettingsModalOpen
-                    ? 'text-[#7C21A4]'
-                    : 'text-neutral-500 hover:text-neutral-800'
-                }`}
-              >
-                <div
-                  className={`px-4 py-1 rounded-full transition ${
-                    isSettingsModalOpen ? 'bg-[#e9dec9]' : 'bg-transparent'
+                <button
+                  onClick={() => setIsSettingsModalOpen(true)}
+                  className={`flex flex-col items-center justify-center gap-0.5 text-[11px] phone:text-[12px] font-bold transition min-w-[74px] phone:min-w-[88px] ${
+                    isSettingsModalOpen
+                      ? 'text-[#7B1FA2]'
+                      : 'text-[#96939A] hover:text-[#29212E]'
                   }`}
                 >
-                  <Settings className="w-5 h-5" />
-                </div>
-                <span className="leading-none">Settings</span>
-              </button>
+                  <div
+                    className={`px-4 phone:px-5 py-1 phone:py-1.5 rounded-full transition ${
+                      isSettingsModalOpen ? 'bg-[#F3EBDD]' : 'bg-transparent'
+                    }`}
+                  >
+                    <Settings className="w-5 h-5 phone:w-5.5 phone:h-5.5 stroke-[2]" />
+                  </div>
+                  <span className="leading-none">Settings</span>
+                </button>
+              </div>
             </nav>
           )}
         </div>

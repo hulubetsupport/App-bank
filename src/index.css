@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --breakpoint-phone: 450px;
+  --breakpoint-phone-lg: 480px;
+}
+
 /* Bundled local Roboto & Roboto Mono offline fonts for APK distribution */
 @font-face {
   font-family: 'Roboto';
@@ -34,6 +39,21 @@
 }
 
 :root {
+  --primary-purple: #7B1FA2;
+  --secondary-purple: #8D24AA;
+  --dark-purple: #542071;
+  --purple-gradient: linear-gradient(145deg, #76169B 0%, #8120A4 48%, #941FAE 100%);
+  --main-bg: #F7F7F9;
+  --card-bg: #FFFFFF;
+  --primary-text: #29212E;
+  --secondary-text: #96939A;
+  --transfer-red: #E65C57;
+  --receive-green: #64A878;
+  --success-green: #159B75;
+  --border-color: #ECECEF;
+  --gold: #D4B15C;
+  --gold-light: #E8D184;
+  --gold-muted: #C9B779;
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
@@ -57,7 +77,8 @@ html, body {
   height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
-  background-color: #F5F3EC;
+  background-color: #F7F7F9;
+  color: #29212E;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -72,6 +93,7 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  background-color: #F7F7F9;
 }
 
 button, input, select, textarea {
