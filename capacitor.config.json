@@ -1,0 +1,6 @@
+{
+  "appId": "et.com.cbe.mobilebanking",
+  "appName": "CBE Mobile Banking",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

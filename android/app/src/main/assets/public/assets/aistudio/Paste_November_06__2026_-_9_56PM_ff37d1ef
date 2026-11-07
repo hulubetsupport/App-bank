@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7C21A4">
+<title>Commercial Bank of Ethiopia</title>
+<style>
+:root {
+  --purple: #7C21A4;
+  --purple-dark: #631684;
+  --gold: #b58d4e;
+  --gold-light: #dfba6c;
+  --card-bg: #181818;
+  --page-bg: #F5F3EC;
+  --tile-bg: #EAE6DB;
+  --ink: #2b2b2b;
+  --muted: #8c8998;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+body {
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--ink);
+}
+button {
+  font: inherit;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Device Shell Formatted To Exactly Match User Phone Frame */
+.app {
+  width: min(100%, 412px);
+  height: 860px;
+  background: var(--page-bg);
+  position: relative;
+  overflow: hidden;
+  border-radius: 36px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Screens */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--page-bg);
+  z-index: 10;
+}
+.screen.active {
+  display: flex;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ================= 1. LOGIN SCREEN ================= */
+#screen-login {
+  background: #ffffff;
+  padding: 24px 22px;
+  justify-content: space-between;
+  align-items: center;
+}
+.login-top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.circle-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f7f6f2;
+  display: grid;
+  place-items: center;
+  color: #333;
+}
+.circle-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+.lang-pill {
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #eee;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.login-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+.cbe-gold-logo {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+.cbe-amh {
+  font-size: 19px;
+  font-weight: 700;
+  color: #b58d4e;
+  letter-spacing: 0.5px;
+}
+.cbe-eng {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #444;
+  margin-top: 4px;
+}
+.login-welcome {
+  margin-top: 32px;
+  font-size: 15px;
+  color: #777;
+}
+
+.login-pin-card {
+  width: 100%;
+  height: 56px;
+  background: #fff;
+  border-radius: 16px;
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  gap: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  border: 1px solid #f0ede6;
+}
+.pin-display-text {
+  font-size: 16px;
+  color: #999;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+.pin-display-text.filled {
+  color: var(--purple);
+  font-size: 26px;
+  letter-spacing: 8px;
+}
+
+.bio-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 32px;
+  cursor: pointer;
+}
+.bio-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--purple);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(124, 33, 164, 0.35);
+}
+.bio-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #333;
+}
+
+.gold-login-btn {
+  width: 100%;
+  height: 52px;
+  border-radius: 26px;
+  background: var(--gold);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 16px rgba(181, 141, 78, 0.3);
+}
+.copyright-text {
+  font-size: 11px;
+  color: #aaa;
+  text-align: center;
+  margin-top: 14px;
+}
+
+/* ================= 2. PURPLE HEADER (SHARED) ================= */
+.purple-header {
+  background: var(--purple);
+  padding: 16px 18px 12px;
+  color: #fff;
+  position: relative;
+  flex-shrink: 0;
+}
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.user-greeting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.app-grid-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  display: grid;
+  place-items: center;
+}
+.user-name-title {
+  font-size: 10px;
+  color: rgba(255,255,255,0.8);
+}
+.user-name-bold {
+  font-size: 15px;
+  font-weight: 700;
+}
+.header-right-btns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lang-chip {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.round-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.round-icon-btn svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* ================= BLACK #181818 BANK CARD ================= */
+.card-wrapper {
+  padding: 0 16px;
+  margin-top: 4px;
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+}
+.balance-card {
+  background: var(--card-bg) url('https://i.postimg.cc/tJHVbGWH/20261105-173340.png') center/cover no-repeat;
+  border-radius: 22px;
+  padding: 18px 20px 14px;
+  color: var(--gold-light);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+.card-header-flex {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-coin {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.card-cbe-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #dfba6c;
+  letter-spacing: 0.3px;
+}
+.card-slogan {
+  font-size: 10px;
+  color: #baa069;
+  margin-top: 2px;
+}
+.card-balance-row {
+  margin: 18px 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 27px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #fff;
+  position: relative;
+}
+.card-balance-row em {
+  font-size: 13px;
+  font-style: normal;
+  letter-spacing: 0;
+  font-weight: 600;
+  color: #dfba6c;
+}
+.eye-toggle-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c979a;
+  background: none;
+}
+.eye-toggle-btn svg {
+  width: 21px;
+  height: 21px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+.card-account-row {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #d1c8a5;
+}
+.card-account-row button {
+  background: none;
+  color: #bbb;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.card-account-row button svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+.card-date-row {
+  text-align: center;
+  font-size: 10px;
+  color: #7a8486;
+  margin-top: 8px;
+}
+
+/* ================= HOME DASHBOARD BODY ================= */
+.home-scroll-area {
+  flex: 1;
+  background: var(--page-bg);
+  border-radius: 28px 28px 0 0;
+  margin-top: 8px;
+  padding: 12px 16px 80px;
+  overflow-y: auto;
+}
+.home-scroll-area::-webkit-scrollbar { display: none; }
+.handle-bar {
+  width: 36px;
+  height: 4px;
+  border-radius: 8px;
+  background: #d9c8b4;
+  margin: 0 auto 12px;
+}
+
+/* 4 Circular Action Icons */
+.quick-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 4px 0 16px;
+  padding: 0 4px;
+}
+.quick-action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b4b4b;
+  text-align: center;
+  width: 68px;
+}
+.quick-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  display: grid;
+  place-items: center;
+  color: var(--purple);
+}
+.quick-icon-circle svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.9;
+}
+.quick-arrow-right {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: grid;
+  place-items: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* 8 CBE Grid Cards */
+.tiles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.service-tile {
+  background: var(--tile-bg);
+  border-radius: 18px;
+  padding: 14px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 5px;
+  min-height: 86px;
+}
+.tile-avatar-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+}
+.tile-avatar-icon.red { color: #d63031; }
+.tile-avatar-icon.green { color: #2e7d32; }
+.tile-avatar-icon.purple { color: var(--purple); }
+.service-tile strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+.service-tile small {
+  font-size: 10px;
+  color: #777;
+}
+
+/* Floating Scan QR Pill */
+.scan-qr-float {
+  position: absolute;
+  bottom: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--purple);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 18px rgba(124, 33, 164, 0.4);
+  z-index: 20;
+}
+.scan-qr-float svg {
+  width: 17px;
+  height: 17px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: var(--page-bg);
+  border-top: 1px solid #e2ded3;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 15;
+}
+.nav-tab-btn {
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: #777;
+  font-size: 11px;
+  font-weight: 600;
+  position: relative;
+  min-width: 65px;
+}
+.nav-tab-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+.nav-tab-btn.active {
+  color: var(--purple);
+}
+.nav-tab-btn.active .nav-icon-pill {
+  background: #e9dec9;
+  padding: 2px 14px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-tab-btn.active svg {
+  stroke: var(--purple);
+}
+
+/* ================= 3. TRANSACTIONS SCREEN ================= */
+#screen-transactions {
+  overflow: hidden;
+}
+.tx-scroll-area {
+  flex: 1;
+  background: var(--page-bg);
+  border-radius: 28px 28px 0 0;
+  margin-top: 8px;
+  padding: 14px 16px 75px;
+  overflow-y: auto;
+}
+.tx-scroll-area::-webkit-scrollbar { display: none; }
+.tx-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #ded9cc;
+  padding-bottom: 8px;
+}
+.tx-filters {
+  display: flex;
+  gap: 22px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tx-tab {
+  color: #8c8896;
+  position: relative;
+  cursor: pointer;
+  padding-bottom: 6px;
+}
+.tx-tab.active {
+  color: #2b2b2b;
+}
+.tx-tab.active:after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: var(--purple);
+  border-radius: 2px;
+}
+.tx-search-btn {
+  color: #777;
+  cursor: pointer;
+}
+.tx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tx-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.tx-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tx-arrow-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tx-arrow-icon.debited {
+  background: #fdebed;
+  color: #d63031;
+}
+.tx-arrow-icon.credited {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.tx-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+.tx-date {
+  font-size: 11px;
+  color: #888;
+  margin-top: 3px;
+}
+.tx-right {
+  text-align: right;
+}
+.tx-amount {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+.tx-amount.debited { color: #d63031; }
+.tx-amount.credited { color: #2e7d32; }
+.tx-category {
+  font-size: 9.5px;
+  color: #8c8896;
+  text-transform: uppercase;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* ================= 4. TRANSFER SCREEN ================= */
+#screen-transfer {
+  background: var(--page-bg);
+}
+.transfer-nav-bar {
+  background: var(--purple);
+  padding: 16px 18px 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+}
+.back-circle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.back-circle-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.4;
+}
+.transfer-card-sheet {
+  flex: 1;
+  background: #fff;
+  border-radius: 28px 28px 0 0;
+  margin-top: -6px;
+  padding: 16px 18px;
+  overflow-y: auto;
+}
+.transfer-card-sheet::-webkit-scrollbar { display: none; }
+
+.acc-switch-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.acc-toggle-pill {
+  flex: 1;
+  height: 40px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.acc-toggle-pill.active {
+  background: var(--purple);
+  color: #fff;
+}
+.acc-toggle-pill.inactive {
+  background: #fff;
+  border: 1px solid #e5e0d4;
+  color: #666;
+}
+
+.from-account-box {
+  background: #1c2833;
+  border-radius: 16px;
+  padding: 14px 16px;
+  color: #fff;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.from-acc-title {
+  font-size: 11px;
+  color: #9cb1c4;
+}
+.from-acc-num {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+.from-acc-balance {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.change-link {
+  color: #dfba6c;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.receiver-resolved-banner {
+  background: #f7ecfa;
+  border: 1px solid #e1bde9;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+}
+.receiver-resolved-banner.show {
+  display: flex;
+}
+.receiver-resolved-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--purple);
+}
+.receiver-verified-badge {
+  font-size: 10.5px;
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.tx-input-card {
+  position: relative;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e8e3d8;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.tx-input-card input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: #222;
+}
+.input-side-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 54px;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border: 1px solid #e0d9cb;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+}
+.search-dropdown.open { display: block; }
+.search-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f2eee6;
+  cursor: pointer;
+}
+.search-item:hover { background: #fbf7ef; }
+.search-item-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+}
+.search-item-acc {
+  font-size: 11px;
+  color: #888;
+}
+
+.add-remark-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+  margin: 6px 0 16px;
+  cursor: pointer;
+}
+.add-remark-row svg {
+  width: 18px;
+  height: 18px;
+  color: var(--purple);
+}
+
+.purple-continue-btn {
+  width: 100%;
+  height: 48px;
+  background: var(--purple);
+  color: #fff;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(124, 33, 164, 0.35);
+  margin-bottom: 16px;
+}
+
+.tx-tabs-line {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid #ded9cc;
+  padding-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.tab-under {
+  color: #888;
+  cursor: pointer;
+}
+.tab-under.active {
+  color: var(--purple);
+  border-bottom: 2px solid var(--purple);
+  padding-bottom: 6px;
+}
+
+.recent-beneficiary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid #f0ede6;
+  cursor: pointer;
+}
+.recent-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ece3f1;
+  color: var(--purple);
+  font-weight: 700;
+  font-size: 12px;
+  display: grid;
+  place-items: center;
+}
+
+/* ================= CONFIRM MODAL ================= */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  display: none;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+.modal-backdrop.show { display: flex; }
+.bottom-modal {
+  background: #fff;
+  border-radius: 26px 26px 0 0;
+  padding: 22px 20px 26px;
+  animation: slideUp .2s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-pill-handle {
+  width: 38px;
+  height: 4px;
+  border-radius: 2px;
+  background: #ddd;
+  margin: 0 auto 16px;
+}
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.modal-data-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.modal-data-label { color: #777; }
+.modal-data-val { font-weight: 700; text-align: right; }
+.modal-total-amt { font-size: 20px; font-weight: 800; color: var(--purple); }
+
+.modal-btn-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+.modal-half-btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.modal-half-btn.gray { background: #eee; color: #555; }
+.modal-half-btn.purple { background: var(--purple); color: #fff; }
+
+/* 6-PIN Modal */
+.pin-dot-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 16px 0 24px;
+}
+.circle-pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--purple);
+}
+.circle-pin-dot.filled { background: var(--purple); }
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.key-btn {
+  background: #ece8dc;
+  height: 52px;
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2b2b2b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.key-btn.action-btn { color: #d63031; }
+
+/* ================= SCREEN 4: CBE SUCCESS RECEIPT ================= */
+#screen-receipt {
+  background: #fff;
+  overflow-y: auto;
+  z-index: 200;
+}
+#screen-receipt::-webkit-scrollbar { display: none; }
+.receipt-header-banner {
+  background: var(--purple);
+  height: 165px;
+  padding: 24px 22px 0;
+  color: #fff;
+  position: relative;
+}
+.receipt-shield-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.big-white-check-circle {
+  position: absolute;
+  bottom: -46px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 92px;
+  background: #fff;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.inner-purple-check {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: var(--purple);
+  display: grid;
+  place-items: center;
+}
+.inner-purple-check svg {
+  width: 44px;
+  height: 44px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.receipt-body-content {
+  padding: 60px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.receipt-success-heading {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 20px;
+}
+.receipt-gray-card {
+  background: #f4f4f4;
+  border-radius: 18px;
+  padding: 20px 18px;
+  width: 100%;
+  border: 1px solid #ebebeb;
+}
+.receipt-card-heading {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 14px;
+}
+.receipt-full-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #2d2d2d;
+}
+.receipt-full-text strong {
+  font-weight: 700;
+  color: #111;
+}
+.receipt-charges-text {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3b3b3b;
+}
+.receipt-qr-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 22px 0 16px;
+}
+.receipt-qr-wrap img {
+  width: 145px;
+  height: 145px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 4px;
+  background: #fff;
+}
+.receipt-cbe-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px dashed #dedede;
+}
+.receipt-cbe-footer img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.receipt-done-btn {
+  margin-top: 22px;
+  background: var(--purple);
+  color: #fff;
+  width: 100%;
+  height: 48px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Toast */
+.toast-notice {
+  position: absolute;
+  z-index: 1000;
+  bottom: 80px;
+  left: 50%;
+  transform: translate(-50%, 15px);
+  background: #282332;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  opacity: 0;
+  transition: .2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast-notice.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= 1. LOGIN SCREEN ================= -->
+  <div class="screen active" id="screen-login">
+    <div class="login-top-bar">
+      <button class="circle-btn" onclick="notify('Notifications')">
+        <svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+      </button>
+
+      <div class="lang-pill" onclick="toggleLanguage()">
+        <span class="active-lang-txt">English</span> ▾
+      </div>
+
+      <button class="circle-btn" onclick="notify('Menu')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      </button>
+    </div>
+
+    <div class="login-center">
+      <img src="https://i.postimg.cc/Hk1pN2VS/20260805-174301.png" alt="CBE Emblem" class="cbe-gold-logo">
+      <div class="cbe-amh">የኢትዮጵያ ንግድ ባንክ</div>
+      <div class="cbe-eng">COMMERCIAL BANK OF ETHIOPIA</div>
+      <div class="login-welcome">Welcome back</div>
+
+      <div class="login-pin-card" onclick="focusPinInput()">
+        <span class="icon" style="width: 22px; height: 22px; color: var(--gold);">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        </span>
+        <div class="pin-display-text" id="login-pin-txt">PIN</div>
+      </div>
+
+      <div class="bio-wrap" onclick="quickBiometricLogin()">
+        <div class="bio-circle">
+          <span class="icon" style="width: 32px; height: 32px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/><path d="M12 2a10 10 0 0 0-7.07 17.07M12 22a10 10 0 0 0 7.07-17.07"/></svg>
+          </span>
+        </div>
+        <div class="bio-label">USE BIOMETRICS</div>
+      </div>
+    </div>
+
+    <div style="width: 100%;">
+      <button class="gold-login-btn" onclick="submitLogin()">
+        <span>Login</span>
+        <span class="icon" style="width: 18px; height: 18px;">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </span>
+      </button>
+      <div class="copyright-text">© Commercial Bank of Ethiopia</div>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN 2: HOME DASHBOARD ================= -->
+  <div class="screen" id="screen-home">
+    <div class="purple-header">
+      <div class="header-row">
+        <div class="user-greeting">
+          <div class="app-grid-icon">
+            <svg style="width:16px;height:16px;fill:#fff;" viewBox="0 0 24 24"><circle cx="5" cy="5" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/></svg>
+          </div>
+          <div>
+            <div class="user-name-title">Hello,</div>
+            <div class="user-name-bold">Aymen</div>
+          </div>
+        </div>
+
+        <div class="header-right-btns">
+          <div class="lang-chip" onclick="toggleLanguage()">English ▾</div>
+          <button class="round-icon-btn" onclick="notify('Refreshed')">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+          <button class="round-icon-btn" onclick="notify('Search')">
+            <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Black #181818 Card (Matches Image Perfectly) -->
+    <div class="card-wrapper">
+      <div class="balance-card">
+        <div class="card-header-flex">
+          <img src="https://i.postimg.cc/Hk1pN2VS/20260805-174301.png" alt="CBE" class="card-coin">
+          <div>
+            <div class="card-cbe-name">Commercial Bank of Ethiopia</div>
+            <div class="card-slogan">The bank you can always rely on!</div>
+          </div>
+        </div>
+
+        <div class="card-balance-row">
+          <span class="app-amount-txt">15,683.01</span><em>ETB</em>
+          <button class="eye-toggle-btn" onclick="toggleBalanceMask()">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+
+        <div class="card-account-row">
+          Wadiah Ordinary 1000562339427
+          <button onclick="copyAcc()"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="12" height="15" rx="2"/><path d="M5 7v14h12"/></svg></button>
+        </div>
+
+        <div class="card-date-row">05 Nov 2026 • 05:22 PM</div>
+      </div>
+    </div>
+
+    <!-- Home Scroll Area -->
+    <div class="home-scroll-area">
+      <div class="handle-bar"></div>
+
+      <!-- Quick Row: Mini Statement, Cash Out, Bill Share, Cards -->
+      <div class="quick-row">
+        <div class="quick-action-item" onclick="openTransactionsScreen()">
+          <div class="quick-icon-circle">
+            <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M8 7h8M8 11h8M8 15h8"/></svg>
+          </div>
+          <span>Mini Statement</span>
+        </div>
+
+        <div class="quick-action-item" onclick="notify('Cash Out')">
+          <div class="quick-icon-circle">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <span>Cash Out</span>
+        </div>
+
+        <div class="quick-action-item" onclick="notify('Bill Share')">
+          <div class="quick-icon-circle">
+            <svg viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17M7 7h5M7 7v5M17 17h-5M17 17v-5"/></svg>
+          </div>
+          <span>Bill Share</span>
+        </div>
+
+        <div class="quick-action-item" onclick="notify('Cards')">
+          <div class="quick-icon-circle">
+            <svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M3 9h18M7 15h4"/></svg>
+          </div>
+          <span>Cards</span>
+        </div>
+
+        <div class="quick-arrow-right" onclick="notify('More')">›</div>
+      </div>
+
+      <!-- CBE Tiles Grid -->
+      <div class="tiles-grid">
+        <div class="service-tile" onclick="goToScreen('screen-transfer')">
+          <div class="tile-avatar-icon red">
+            <svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></svg>
+          </div>
+          <strong>CBE Transfer</strong>
+          <small>Send Money</small>
+        </div>
+
+        <div class="service-tile" onclick="notify('Receive')">
+          <div class="tile-avatar-icon green">
+            <svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;" viewBox="0 0 24 24"><path d="m17 7-10 10m9 0H7V8"/></svg>
+          </div>
+          <strong>Receive</strong>
+          <small>Get Paid</small>
+        </div>
+
+        <div class="service-tile" onclick="notify('Airtime')">
+          <div class="tile-avatar-icon purple">
+            <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          </div>
+          <strong>Airtime</strong>
+        </div>
+
+        <div class="service-tile" onclick="notify('Other Transfers')">
+          <div class="tile-avatar-icon purple">
+            <svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;" viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg>
+          </div>
+          <strong>Other Transfers</strong>
+        </div>
+
+        <div class="service-tile" onclick="notify('CBEBirr')">
+          <div class="tile-avatar-icon purple">
+            <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+          </div>
+          <strong>CBEBirr</strong>
+        </div>
+
+        <div class="service-tile" onclick="notify('Bills & Utilities')">
+          <div class="tile-avatar-icon purple">
+            <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <strong>Bills &amp; Utilities</strong>
+        </div>
+
+        <div class="service-tile" onclick="notify('Banking')">
+          <div class="tile-avatar-icon purple">
+            <svg style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;" viewBox="0 0 24 24"><path d="M2.5 9h19L12 3 2.5 9Z"/><path d="M4.5 10v8M8.5 10v8M15.5 10v8M19.5 10v8M2.5 20h19"/></svg>
+          </div>
+          <strong>Banking</strong>
+        </div>
+
+        <div class="service-tile" onclick="notify('Government Services')">
+          <div class="tile-avatar-icon purple">
+            <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M8 7h2v2H8zM14 7h2v2h-2zM8 12h2v2H8zM14 12h2v2h-2zM10 21v-4h4v4"/></svg>
+          </div>
+          <strong>Government Services</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Scan QR Pill -->
+    <div class="scan-qr-float" onclick="notify('Scan QR')">
+      <svg viewBox="0 0 24 24"><path d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/></svg>
+      <span>Scan QR</span>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-tab-btn active" id="btn-nav-home" onclick="openHomeScreen()">
+        <span class="nav-icon-pill"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v10h-6v-6H9v6H3z"/></svg></span>
+        <span>Home</span>
+      </button>
+
+      <button class="nav-tab-btn" id="btn-nav-tx" onclick="openTransactionsScreen()">
+        <span class="nav-icon-pill"><svg viewBox="0 0 24 24"><path d="M3 9h18L12 3 3 9ZM5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/></svg></span>
+        <span>Transactions</span>
+      </button>
+
+      <button class="nav-tab-btn" onclick="notify('Settings')">
+        <span class="nav-icon-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.5 2.6-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.9h-3l-.3-1.9a8 8 0 0 1-1.7-1l-1.7.7-1.5-2.6 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.5-2.6 1.7.7a8 8 0 0 1 1.7-1l.3-1.9h3l.3 1.9a8 8 0 0 1 1.7 1l1.7-.7 1.5 2.6-1.4 1.1a7 7 0 0 1 0 2Z"/></svg></span>
+        <span>Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ================= SCREEN 3: TRANSACTIONS TAB ================= -->
+  <div class="screen" id="screen-transactions">
+    <div class="purple-header">
+      <div class="header-row">
+        <div class="user-greeting">
+          <div class="app-grid-icon">
+            <svg style="width:16px;height:16px;fill:#fff;" viewBox="0 0 24 24"><circle cx="5" cy="5" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/></svg>
+          </div>
+          <div>
+            <div class="user-name-title">Hello,</div>
+            <div class="user-name-bold">Aymen</div>
+          </div>
+        </div>
+
+        <div class="header-right-btns">
+          <div class="lang-chip" onclick="toggleLanguage()">English ▾</div>
+          <button class="round-icon-btn" onclick="renderTransactions()">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+          <button class="round-icon-btn" onclick="notify('Search transactions')">
+            <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Black #181818 Card (Matches Image Exactly) -->
+    <div class="card-wrapper">
+      <div class="balance-card">
+        <div class="card-header-flex">
+          <img src="https://i.postimg.cc/Hk1pN2VS/20260805-174301.png" alt="CBE" class="card-coin">
+          <div>
+            <div class="card-cbe-name">Commercial Bank of Ethiopia</div>
+            <div class="card-slogan">The bank you can always rely on!</div>
+          </div>
+        </div>
+
+        <div class="card-balance-row">
+          <span class="app-amount-txt">15,683.01</span><em>ETB</em>
+          <button class="eye-toggle-btn" onclick="toggleBalanceMask()">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+
+        <div class="card-account-row">
+          Wadiah Ordinary 1000562339427
+          <button onclick="copyAcc()"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="12" height="15" rx="2"/><path d="M5 7v14h12"/></svg></button>
+        </div>
+
+        <div class="card-date-row">05 Nov 2026 • 05:22 PM</div>
+      </div>
+    </div>
+
+    <!-- Transactions List -->
+    <div class="tx-scroll-area">
+      <div class="handle-bar"></div>
+
+      <!-- Filter bar: All / Debited / Credited -->
+      <div class="tx-filter-bar">
+        <div class="tx-filters">
+          <span class="tx-tab active" onclick="setTxFilter('all', this)">All</span>
+          <span class="tx-tab" onclick="setTxFilter('debited', this)">Debited</span>
+          <span class="tx-tab" onclick="setTxFilter('credited', this)">Credited</span>
+        </div>
+        <div class="tx-search-btn" onclick="notify('Filter search')">
+          <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+      </div>
+
+      <!-- History Items (Matches User's Photo) -->
+      <div class="tx-list" id="tx-history-container"></div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <button class="nav-tab-btn" onclick="openHomeScreen()">
+        <span class="nav-icon-pill"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v10h-6v-6H9v6H3z"/></svg></span>
+        <span>Home</span>
+      </button>
+
+      <button class="nav-tab-btn active" onclick="openTransactionsScreen()">
+        <span class="nav-icon-pill"><svg viewBox="0 0 24 24"><path d="M3 9h18L12 3 3 9ZM5 10v8M9 10v8M15 10v8M19 10v8M3 20h18"/></svg></span>
+        <span>Transactions</span>
+      </button>
+
+      <button class="nav-tab-btn" onclick="notify('Settings')">
+        <span class="nav-icon-pill"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.5 2.6-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.9h-3l-.3-1.9a8 8 0 0 1-1.7-1l-1.7.7-1.5-2.6 1.4-1.1a7 7 0 0 1 0-2l-1.4-1.1 1.5-2.6 1.7.7a8 8 0 0 1 1.7-1l.3-1.9h3l.3 1.9a8 8 0 0 1 1.7 1l1.7-.7 1.5 2.6-1.4 1.1a7 7 0 0 1 0 2Z"/></svg></span>
+        <span>Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ================= SCREEN 4: CBE TRANSFER ================= -->
+  <div class="screen" id="screen-transfer">
+    <div class="transfer-nav-bar">
+      <button class="back-circle-btn" onclick="goToScreen('screen-home')">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span>CBE Transfer</span>
+    </div>
+
+    <div class="transfer-card-sheet">
+      <div class="acc-switch-row">
+        <button class="acc-toggle-pill active">Other Account ✓</button>
+        <button class="acc-toggle-pill inactive" onclick="notify('Own Account selected')">Own Account</button>
+      </div>
+
+      <div class="from-account-box">
+        <div>
+          <div class="from-acc-title">From Account</div>
+          <div class="from-acc-num">Wadiah Ordinary - 1*********9427</div>
+          <div class="from-acc-balance">•••••• 👁</div>
+        </div>
+        <div class="change-link" onclick="notify('Switch account')">
+          <span>▾</span>
+          <span>Change</span>
+        </div>
+      </div>
+
+      <!-- Receiver Verified Banner -->
+      <div class="receiver-resolved-banner show" id="receiver-banner">
+        <div>
+          <div style="font-size:10px; color:#777; text-transform:uppercase;">Receiver Name</div>
+          <div class="receiver-resolved-name" id="resolved-receiver-text">Tsegaye Abebe Berihun</div>
+        </div>
+        <div class="receiver-verified-badge">✓ VERIFIED</div>
+      </div>
+
+      <!-- Account Input with Autocomplete -->
+      <div class="tx-input-card">
+        <span class="input-side-icon icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/></svg>
+        </span>
+        <input type="text" id="transfer-acc-input" placeholder="Account Number" value="1000293817314" oninput="handleAccountSearch()">
+        <span class="icon" style="width:20px;height:20px;color:var(--purple);cursor:pointer;" onclick="notify('QR Scanner opened')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v4h2V5h4V3H5c-1.1 0-2 .9-2 2zm2 10H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm14 4h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zm0-16h-4v2h4v4h2V5c0-1.1-.9-2-2-2z"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+        </span>
+
+        <div class="search-dropdown" id="search-dropdown-menu"></div>
+      </div>
+
+      <!-- Amount Input -->
+      <div class="tx-input-card">
+        <span class="input-side-icon icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        </span>
+        <input type="number" id="transfer-amount-input" placeholder="Amount*" value="850">
+        <span class="icon" style="width:20px;height:20px;color:var(--purple);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
+        </span>
+      </div>
+
+      <div class="add-remark-row" onclick="notify('Remark: MB transfer')">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        </span>
+        <span>Add remark <i>*Default: MB transfer</i></span>
+      </div>
+
+      <button class="purple-continue-btn" onclick="openConfirmDialog()">Continue</button>
+
+      <div class="tx-tabs-line">
+        <span class="tab-under active">Recent Transfers</span>
+        <span class="tab-under" onclick="notify('Beneficiaries')">Beneficiaries</span>
+      </div>
+
+      <div id="transfer-recent-list"></div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 1: PLEASE CONFIRM ================= -->
+  <div class="modal-backdrop" id="confirm-modal">
+    <div class="bottom-modal">
+      <div class="modal-pill-handle"></div>
+      <div class="modal-title">Please Confirm</div>
+
+      <div class="modal-data-row">
+        <span class="modal-data-label">From</span>
+        <div class="modal-data-val">
+          <div>Aymen Kemal Ali</div>
+          <div style="font-size:11px;color:#888;">1*********9427</div>
+        </div>
+      </div>
+
+      <div class="modal-data-row">
+        <span class="modal-data-label">To</span>
+        <div class="modal-data-val">
+          <div id="confirm-receiver-name">Tsegaye Abebe Berihun</div>
+          <div id="confirm-receiver-acc" style="font-size:11px;color:#888;">1000293817314</div>
+        </div>
+      </div>
+
+      <div class="modal-data-row" style="margin-top:16px;">
+        <span class="modal-data-label">Total Amount</span>
+        <div class="modal-total-amt" id="confirm-amount-val">850.00 ETB</div>
+      </div>
+
+      <div class="modal-btn-row">
+        <button class="modal-half-btn gray" onclick="closeConfirmDialog()">Cancel</button>
+        <button class="modal-half-btn purple" onclick="openPinDialog()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: 6-DIGIT PIN ================= -->
+  <div class="modal-backdrop" id="pin-modal">
+    <div class="bottom-modal">
+      <div class="modal-pill-handle"></div>
+      <div class="modal-title">Enter your PIN to confirm</div>
+
+      <div class="pin-dot-wrap">
+        <span class="circle-pin-dot" id="p-1"></span>
+        <span class="circle-pin-dot" id="p-2"></span>
+        <span class="circle-pin-dot" id="p-3"></span>
+        <span class="circle-pin-dot" id="p-4"></span>
+        <span class="circle-pin-dot" id="p-5"></span>
+        <span class="circle-pin-dot" id="p-6"></span>
+      </div>
+
+      <div class="keypad-grid">
+        <button class="key-btn" onclick="pressTxPin('1')">1</button>
+        <button class="key-btn" onclick="pressTxPin('2')">2</button>
+        <button class="key-btn" onclick="pressTxPin('3')">3</button>
+        <button class="key-btn" onclick="pressTxPin('4')">4</button>
+        <button class="key-btn" onclick="pressTxPin('5')">5</button>
+        <button class="key-btn" onclick="pressTxPin('6')">6</button>
+        <button class="key-btn" onclick="pressTxPin('7')">7</button>
+        <button class="key-btn" onclick="pressTxPin('8')">8</button>
+        <button class="key-btn" onclick="pressTxPin('9')">9</button>
+        <button class="key-btn action-btn" onclick="delTxPin()">
+          <span class="icon" style="width:22px;height:22px;"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/></svg></span>
+        </button>
+        <button class="key-btn" onclick="pressTxPin('0')">0</button>
+        <button class="key-btn" style="font-size:14px;color:#777;" onclick="closePinDialog()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN 5: CBE SUCCESS RECEIPT ================= -->
+  <div class="screen" id="screen-receipt">
+    <div class="receipt-header-banner">
+      <div class="receipt-shield-row">
+        <span class="icon" style="width:30px;height:30px;">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        </span>
+        <div>
+          <div style="font-size:20px;font-weight:700;">Thank you</div>
+          <div style="font-size:12px;color:#f3d7fa;">Success</div>
+        </div>
+      </div>
+
+      <div class="big-white-check-circle">
+        <div class="inner-purple-check">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="receipt-body-content">
+      <div class="receipt-success-heading">Transaction Completed Successfully!</div>
+
+      <div class="receipt-gray-card">
+        <div class="receipt-card-heading">Transaction Summary</div>
+        <div class="receipt-full-text">
+          ETB <strong id="rcpt-sum-amt">850.00</strong> has been debited from <strong>Aymen Kemal Ali</strong> ETB-9427 for <strong id="rcpt-sum-receiver">Tsegaye Abebe Berihun</strong> <span id="rcpt-sum-acc">ETB-7314</span> on <strong id="rcpt-sum-date">05 Nov 2026 12:12 PM</strong> with transaction ID: <strong id="rcpt-sum-txid">FT26309HZ9G2</strong>.
+        </div>
+
+        <div class="receipt-charges-text">
+          Reason: <span>MB transfer</span><br>
+          Total Amount Debited: ETB<span id="rcpt-sum-debited">850.00</span> with Service Charge of ETB0.00, VAT (15%) of 0.0 and Disaster Recovery (5%) of ETB0.00.
+        </div>
+
+        <div class="receipt-qr-wrap">
+          <img id="rcpt-sum-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=FT26309HZ9G2-CBE" alt="Receipt QR">
+        </div>
+
+        <div class="receipt-cbe-footer">
+          <img src="https://i.postimg.cc/Hk1pN2VS/20260805-174301.png" alt="CBE">
+          <div>
+            <div style="font-size:13.5px;font-weight:700;color:#222;">Commercial Bank of Ethiopia</div>
+            <div style="font-size:10.5px;color:#666;">The bank you can always rely on!</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="receipt-done-btn" onclick="openTransactionsScreen()">Done</button>
+    </div>
+  </div>
+
+  <div class="toast-notice" id="toast-box"></div>
+</div>
+
+<script>
+/* ================= DATABASE & STATE ================= */
+let balance = 15683.01;
+let isBalanceMasked = false;
+let typedLoginPin = "";
+let enteredTxPin = "";
+let currentTxFilter = "all";
+
+const registeredAccounts = [
+  { name: "Tsegaye Abebe Berihun", acc: "1000293817314", masked: "1*********7314", initials: "TA" },
+  { name: "Sofiya Seid Yesuf", acc: "1000392819143", masked: "1*********9143", initials: "SS" },
+  { name: "Abdu Mohammed", acc: "1000592813321", masked: "1*********3321", initials: "AM" },
+  { name: "Aminat Mohammed", acc: "1000782910012", masked: "1*********0012", initials: "AM" },
+  { name: "Bilal Seid Abdu", acc: "1000382106157", masked: "1*********6157", initials: "BA" },
+  { name: "Momina Mekuriyaw Adem", acc: "1000482914708", masked: "1*********4708", initials: "MM" },
+  { name: "Sara Endris Ali", acc: "1000293813474", masked: "1*********3474", initials: "SE" },
+  { name: "Fuad Aragaw Hassen", acc: "1000192815952", masked: "1*********5952", initials: "FA" }
+];
+
+let activeRecipient = registeredAccounts[0];
+
+/* Exactly matching the transactions from your photo */
+let transactionHistory = [
+  { name: "Sofiya Seid", date: "05-Nov-26 12:44 PM", amount: 5000.00, type: "credited", cat: "ACCOUNT TO ACCOUNT" },
+  { name: "Tsegaye Abebe", date: "05-Nov-26 12:12 PM", amount: 850.00, type: "debited", cat: "ACCOUNT TO ACCOUNT" },
+  { name: "Abdu Mohammed", date: "05-Nov-26 11:14 AM", amount: 500.00, type: "debited", cat: "ACCOUNT TO ACCOUNT" },
+  { name: "Air Time", date: "04-Nov-26 8:40 PM", amount: 45.00, type: "debited", cat: "TOP-UP (AIRTIME & DATA RECHARGE)" },
+  { name: "Aminat Mohammed", date: "04-Nov-26 7:39 PM", amount: 2000.00, type: "credited", cat: "ACCOUNT TO ACCOUNT" },
+  { name: "Bilal Seid", date: "04-Nov-26 3:20 PM", amount: 400.00, type: "debited", cat: "ACCOUNT TO ACCOUNT" }
+];
+
+function notify(text) {
+  const toast = document.getElementById('toast-box');
+  toast.textContent = text;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function goToScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function openHomeScreen() {
+  document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#btn-nav-home').forEach(b => b.classList.add('active'));
+  goToScreen('screen-home');
+}
+
+function openTransactionsScreen() {
+  document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#btn-nav-tx').forEach(b => b.classList.add('active'));
+  renderTransactions();
+  goToScreen('screen-transactions');
+}
+
+function copyAcc() {
+  navigator.clipboard?.writeText('1000562339427');
+  notify('Copied: 1000562339427');
+}
+
+function toggleLanguage() {
+  const isEng = document.querySelector('.active-lang-txt').textContent === 'English';
+  const newLang = isEng ? 'አማርኛ' : 'English';
+  document.querySelectorAll('.active-lang-txt, .lang-chip').forEach(el => el.textContent = newLang + ' ▾');
+  notify('Language changed: ' + newLang);
+}
+
+function toggleBalanceMask() {
+  isBalanceMasked = !isBalanceMasked;
+  const val = isBalanceMasked ? "******" : balance.toLocaleString('en-US', { minimumFractionDigits: 2 });
+  document.querySelectorAll('.app-amount-txt').forEach(el => el.textContent = val);
+}
+
+/* Login */
+function focusPinInput() {
+  if (typedLoginPin.length < 4) {
+    typedLoginPin = "1234";
+    document.getElementById('login-pin-txt').textContent = "••••";
+    document.getElementById('login-pin-txt').classList.add('filled');
+  }
+}
+function quickBiometricLogin() {
+  notify('Biometric verified');
+  setTimeout(openHomeScreen, 250);
+}
+function submitLogin() {
+  openHomeScreen();
+}
+
+/* Transactions Filter & Render */
+function setTxFilter(filter, tabEl) {
+  currentTxFilter = filter;
+  document.querySelectorAll('.tx-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  renderTransactions();
+}
+
+function renderTransactions() {
+  const container = document.getElementById('tx-history-container');
+  container.innerHTML = "";
+
+  const filtered = transactionHistory.filter(item => {
+    if (currentTxFilter === 'all') return true;
+    return item.type === currentTxFilter;
+  });
+
+  filtered.forEach(tx => {
+    const card = document.createElement('div');
+    card.className = "tx-card";
+
+    const isCredit = tx.type === "credited";
+    const sign = isCredit ? "+" : "-";
+    const arrowSvg = isCredit
+      ? `<svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" transform="rotate(45 12 12)"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;"><path d="M5 4v2h10.59L3.29 18.29l1.42 1.42L17 7.41V18h2V4z"/></svg>`;
+
+    card.innerHTML = `
+      <div class="tx-left">
+        <div class="tx-arrow-icon ${tx.type}">
+          ${arrowSvg}
+        </div>
+        <div>
+          <div class="tx-title">${tx.name}</div>
+          <div class="tx-date">${tx.date}</div>
+        </div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount ${tx.type}">
+          ${sign}${tx.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} ETB
+        </div>
+        <div class="tx-category">${tx.cat}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+/* Transfer Autocomplete */
+const accInput = document.getElementById('transfer-acc-input');
+const dropdown = document.getElementById('search-dropdown-menu');
+const receiverBanner = document.getElementById('receiver-banner');
+const receiverText = document.getElementById('resolved-receiver-text');
+
+function handleAccountSearch() {
+  const query = accInput.value.trim().toLowerCase();
+  
+  if (!query) {
+    dropdown.classList.remove('open');
+    return;
+  }
+
+  const results = registeredAccounts.filter(a => 
+    a.acc.includes(query) || a.name.toLowerCase().includes(query)
+  );
+
+  if (results.length === 0) {
+    dropdown.classList.remove('open');
+    return;
+  }
+
+  dropdown.innerHTML = "";
+  results.forEach(item => {
+    const row = document.createElement('div');
+    row.className = "search-item";
+    row.innerHTML = `
+      <div class="search-item-name">${item.name}</div>
+      <div class="search-item-acc">${item.acc}</div>
+    `;
+    row.onclick = () => chooseRecipient(item);
+    dropdown.appendChild(row);
+  });
+
+  dropdown.classList.add('open');
+
+  const exact = registeredAccounts.find(a => a.acc === query);
+  if (exact) chooseRecipient(exact);
+}
+
+function chooseRecipient(item) {
+  activeRecipient = item;
+  accInput.value = item.acc;
+  receiverText.textContent = item.name;
+  receiverBanner.classList.add('show');
+  dropdown.classList.remove('open');
+}
+
+function renderTransferList() {
+  const list = document.getElementById('transfer-recent-list');
+  list.innerHTML = "";
+  registeredAccounts.forEach(c => {
+    const row = document.createElement('div');
+    row.className = "recent-beneficiary-item";
+    row.onclick = () => chooseRecipient(c);
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="recent-avatar">${c.initials}</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#222;">${c.name}</div>
+          <div style="font-size:11px;color:#888;">${c.masked}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;color:#bbb;">
+        <svg style="width:16px;height:16px;" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        <svg style="width:16px;height:16px;" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+/* Modals */
+function openConfirmDialog() {
+  const amt = parseFloat(document.getElementById('transfer-amount-input').value);
+  if (!amt || amt <= 0) return notify('Please enter a valid amount');
+
+  document.getElementById('confirm-receiver-name').textContent = activeRecipient.name;
+  document.getElementById('confirm-receiver-acc').textContent = activeRecipient.acc;
+  document.getElementById('confirm-amount-val').textContent = amt.toFixed(2) + " ETB";
+  document.getElementById('confirm-modal').classList.add('show');
+}
+function closeConfirmDialog() {
+  document.getElementById('confirm-modal').classList.remove('show');
+}
+function openPinDialog() {
+  closeConfirmDialog();
+  enteredTxPin = "";
+  updatePinDots();
+  document.getElementById('pin-modal').classList.add('show');
+}
+function closePinDialog() {
+  document.getElementById('pin-modal').classList.remove('show');
+}
+function pressTxPin(digit) {
+  if (enteredTxPin.length < 6) {
+    enteredTxPin += digit;
+    updatePinDots();
+  }
+  if (enteredTxPin.length === 6) {
+    setTimeout(executeTransfer, 250);
+  }
+}
+function delTxPin() {
+  enteredTxPin = enteredTxPin.slice(0, -1);
+  updatePinDots();
+}
+function updatePinDots() {
+  for (let i = 1; i <= 6; i++) {
+    const el = document.getElementById(`p-${i}`);
+    if (i <= enteredTxPin.length) el.classList.add('filled');
+    else el.classList.remove('filled');
+  }
+}
+
+/* Transaction Execution & Receipt */
+function executeTransfer() {
+  closePinDialog();
+  const amt = parseFloat(document.getElementById('transfer-amount-input').value) || 850.00;
+  balance -= amt;
+  
+  document.querySelectorAll('.app-amount-txt').forEach(el => {
+    el.textContent = balance.toLocaleString('en-US', { minimumFractionDigits: 2 });
+  });
+
+  const now = new Date();
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dateFormatted = `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${String(now.getFullYear()).slice(-2)} ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+  
+  // Prepend to transaction list
+  transactionHistory.unshift({
+    name: activeRecipient.name,
+    date: dateFormatted,
+    amount: amt,
+    type: "debited",
+    cat: "ACCOUNT TO ACCOUNT"
+  });
+
+  const fullDateStr = `${String(now.getDate()).padStart(2, '0')} ${months[now.getMonth()]} ${now.getFullYear()} ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+  const randomTx = "FT" + Math.floor(1000000000 + Math.random() * 9000000000).toString().substring(0, 10);
+  const shortAcc = "ETB-" + activeRecipient.acc.slice(-4);
+
+  document.getElementById('rcpt-sum-amt').textContent = amt.toFixed(2);
+  document.getElementById('rcpt-sum-receiver').textContent = activeRecipient.name;
+  document.getElementById('rcpt-sum-acc').textContent = shortAcc;
+  document.getElementById('rcpt-sum-date').textContent = fullDateStr;
+  document.getElementById('rcpt-sum-txid').textContent = randomTx;
+  document.getElementById('rcpt-sum-debited').textContent = amt.toFixed(2);
+  document.getElementById('rcpt-sum-qr').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${randomTx}-${amt}ETB-CBE`;
+
+  goToScreen('screen-receipt');
+}
+
+// Initialize
+renderTransferList();
+renderTransactions();
+chooseRecipient(registeredAccounts[0]);
+</script>
+</body>
+</html>
