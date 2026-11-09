@@ -16,6 +16,7 @@ interface ReceiptScreenProps {
   transaction: Transaction;
   senderName: string;
   senderAccount?: string;
+  remainingBalance?: number;
   onClose: () => void;
 }
 
@@ -23,6 +24,7 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
   transaction,
   senderName,
   senderAccount = '1000562339427',
+  remainingBalance,
   onClose,
 }) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
@@ -120,6 +122,7 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
             Total Amount Debited: ETB{formatETB(transaction.amount)} with Service Charge
             of ETB0.00, VAT (15%) of 0.0 and Disaster Recovery (5%) of ETB0.00.
           </div>
+
 
           {/* Centered QR Code */}
           <div className="flex justify-center my-3.5 phone:my-5">

@@ -12,6 +12,7 @@ interface BankCardProps {
   lastUpdated: string;
   onCopyAccount: () => void;
   copied: boolean;
+  onOpenBalanceModal?: () => void;
 }
 
 export const BankCard: React.FC<BankCardProps> = ({
@@ -23,6 +24,7 @@ export const BankCard: React.FC<BankCardProps> = ({
   lastUpdated,
   onCopyAccount,
   copied,
+  onOpenBalanceModal,
 }) => {
   // Masked format: "1 **** 9427"
   const maskedDisplay =
@@ -113,7 +115,13 @@ export const BankCard: React.FC<BankCardProps> = ({
 
         {/* 2. Balance Row: Default VISIBLE + ETB + Synchronized Eye Toggle */}
         <div className="relative my-2 phone:my-3 flex items-center justify-center">
-          <div className="flex items-baseline gap-1.5 text-center">
+          <div
+            onClick={onOpenBalanceModal}
+            className={`flex items-baseline gap-1.5 text-center ${
+              onOpenBalanceModal ? 'cursor-pointer hover:opacity-90 active:scale-98 transition' : ''
+            }`}
+            title="View Account Details & Breakdown"
+          >
             {isMasked ? (
               <span className="text-[28px] phone:text-[33px] font-bold tracking-[5px] text-white font-mono leading-none">
                 ******

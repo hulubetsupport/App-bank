@@ -16,6 +16,10 @@ import {
   Landmark,
   Building2,
   ScanLine,
+  Store,
+  Plane,
+  ShoppingBag,
+  Film,
 } from 'lucide-react';
 import { BankCard } from './BankCard.tsx';
 import { ScreenType } from '../types/index.ts';
@@ -36,6 +40,14 @@ interface HomeScreenProps {
   copied: boolean;
   onCopyAccount: () => void;
   onOpenSettings: () => void;
+  onOpenBalanceModal?: () => void;
+  onOpenAirtime?: () => void;
+  onOpenCbeBirr?: () => void;
+  onOpenBankingServices?: () => void;
+  onOpenPayMerchant?: () => void;
+  onOpenTravel?: () => void;
+  onOpenShopping?: () => void;
+  onOpenEntertainment?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -54,6 +66,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   copied,
   onCopyAccount,
   onOpenSettings,
+  onOpenBalanceModal,
+  onOpenAirtime,
+  onOpenCbeBirr,
+  onOpenBankingServices,
+  onOpenPayMerchant,
+  onOpenTravel,
+  onOpenShopping,
+  onOpenEntertainment,
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -133,6 +153,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           lastUpdated="06-Nov-26 10:52 PM"
           onCopyAccount={onCopyAccount}
           copied={copied}
+          onOpenBalanceModal={onOpenBalanceModal}
         />
       </div>
 
@@ -240,7 +261,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Row 2 - Left: Airtime */}
           <button
-            onClick={() => onNavigate('transfer')}
+            onClick={onOpenAirtime || (() => onNavigate('transfer'))}
             className="h-[74px] phone:h-[88px] phone-lg:h-[94px] bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-[18px] phone:rounded-[22px] px-3 flex flex-col items-center justify-center gap-1.5 phone:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#ECECEF]"
           >
             <div className="w-7 h-7 phone:w-9 phone:h-9 flex items-center justify-center text-[#7B1FA2]">
@@ -266,7 +287,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Row 3 - Left: CBEBirr */}
           <button
-            onClick={() => onNavigate('transfer')}
+            onClick={onOpenCbeBirr || (() => onNavigate('transfer'))}
             className="h-[74px] phone:h-[88px] phone-lg:h-[94px] bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-[18px] phone:rounded-[22px] px-3 flex flex-col items-center justify-center gap-1.5 phone:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#ECECEF]"
           >
             <div className="w-7 h-7 phone:w-9 phone:h-9 flex items-center justify-center text-[#7B1FA2]">
@@ -292,7 +313,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Row 4 - Left: Banking */}
           <button
-            onClick={() => onNavigate('transactions')}
+            onClick={onOpenBankingServices || (() => onNavigate('transactions'))}
             className="h-[74px] phone:h-[88px] phone-lg:h-[94px] bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-[18px] phone:rounded-[22px] px-3 flex flex-col items-center justify-center gap-1.5 phone:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#ECECEF]"
           >
             <div className="w-7 h-7 phone:w-9 phone:h-9 flex items-center justify-center text-[#7B1FA2]">
@@ -313,6 +334,58 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
             <span className="text-[12.5px] phone:text-[14px] phone-lg:text-[14.5px] font-semibold text-[#29212E] leading-none">
               Government Services
+            </span>
+          </button>
+
+          {/* Row 5 - Left: Pay Merchant (ሱቅ / ነጋዴ ክፍያ) */}
+          <button
+            onClick={onOpenPayMerchant || (() => onNavigate('transfer'))}
+            className="h-[74px] phone:h-[88px] phone-lg:h-[94px] bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-[18px] phone:rounded-[22px] px-3 flex flex-col items-center justify-center gap-1.5 phone:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#ECECEF]"
+          >
+            <div className="w-7 h-7 phone:w-9 phone:h-9 flex items-center justify-center text-[#7B1FA2]">
+              <Store className="w-5 h-5 phone:w-6.5 phone:h-6.5 fill-[#7B1FA2]/15 stroke-[2]" />
+            </div>
+            <span className="text-[12.5px] phone:text-[14px] phone-lg:text-[14.5px] font-semibold text-[#29212E] leading-none">
+              Pay Merchant
+            </span>
+          </button>
+
+          {/* Row 5 - Right: Travel (ጉዞ እና ትራንስፖርት) */}
+          <button
+            onClick={onOpenTravel || (() => onNavigate('transfer'))}
+            className="h-[74px] phone:h-[88px] phone-lg:h-[94px] bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-[18px] phone:rounded-[22px] px-3 flex flex-col items-center justify-center gap-1.5 phone:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#ECECEF]"
+          >
+            <div className="w-7 h-7 phone:w-9 phone:h-9 flex items-center justify-center text-[#7B1FA2]">
+              <Plane className="w-5 h-5 phone:w-6.5 phone:h-6.5 fill-[#7B1FA2]/15 stroke-[2]" />
+            </div>
+            <span className="text-[12.5px] phone:text-[14px] phone-lg:text-[14.5px] font-semibold text-[#29212E] leading-none">
+              Travel
+            </span>
+          </button>
+
+          {/* Row 6 - Left: Shopping (ግዢ እና ሱቆች) */}
+          <button
+            onClick={onOpenShopping || (() => onNavigate('transfer'))}
+            className="h-[74px] phone:h-[88px] phone-lg:h-[94px] bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-[18px] phone:rounded-[22px] px-3 flex flex-col items-center justify-center gap-1.5 phone:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#ECECEF]"
+          >
+            <div className="w-7 h-7 phone:w-9 phone:h-9 flex items-center justify-center text-[#7B1FA2]">
+              <ShoppingBag className="w-5 h-5 phone:w-6.5 phone:h-6.5 fill-[#7B1FA2]/15 stroke-[2]" />
+            </div>
+            <span className="text-[12.5px] phone:text-[14px] phone-lg:text-[14.5px] font-semibold text-[#29212E] leading-none">
+              Shopping
+            </span>
+          </button>
+
+          {/* Row 6 - Right: Entertainment (መዝናኛ) */}
+          <button
+            onClick={onOpenEntertainment || (() => onNavigate('transfer'))}
+            className="h-[74px] phone:h-[88px] phone-lg:h-[94px] bg-white hover:bg-neutral-50 active:scale-[0.98] transition rounded-[18px] phone:rounded-[22px] px-3 flex flex-col items-center justify-center gap-1.5 phone:gap-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#ECECEF]"
+          >
+            <div className="w-7 h-7 phone:w-9 phone:h-9 flex items-center justify-center text-[#7B1FA2]">
+              <Film className="w-5 h-5 phone:w-6.5 phone:h-6.5 fill-[#7B1FA2]/15 stroke-[2]" />
+            </div>
+            <span className="text-[12.5px] phone:text-[14px] phone-lg:text-[14.5px] font-semibold text-[#29212E] leading-none">
+              Entertainment
             </span>
           </button>
         </div>

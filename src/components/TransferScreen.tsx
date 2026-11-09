@@ -44,7 +44,7 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
   const [activeTab, setActiveTab] = useState<'recent' | 'beneficiaries'>('recent');
   const [suggestions, setSuggestions] = useState<Recipient[]>([]);
   const [errorText, setErrorText] = useState<string>('');
-  const [isFromBalanceMasked, setIsFromBalanceMasked] = useState<boolean>(false);
+  const [isFromBalanceMasked, setIsFromBalanceMasked] = useState<boolean>(true);
 
   // Masked representation: 1*********9427
   const maskedAcc =

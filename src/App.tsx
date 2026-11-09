@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ScreenType,
   Transaction,
@@ -23,6 +23,14 @@ import { GovernmentServicesModal } from './components/GovernmentServicesModal.ts
 import { SettingsModal } from './components/SettingsModal.tsx';
 import { ReceiveModal } from './components/ReceiveModal.tsx';
 import { ScanQrModal } from './components/ScanQrModal.tsx';
+import { AccountBalanceModal } from './components/AccountBalanceModal.tsx';
+import { AirtimeModal } from './components/AirtimeModal.tsx';
+import { CbeBirrModal } from './components/CbeBirrModal.tsx';
+import { BankingServicesModal } from './components/BankingServicesModal.tsx';
+import { PayMerchantModal } from './components/PayMerchantModal.tsx';
+import { TravelModal } from './components/TravelModal.tsx';
+import { ShoppingModal } from './components/ShoppingModal.tsx';
+import { EntertainmentModal } from './components/EntertainmentModal.tsx';
 import { Home, Landmark, Settings } from 'lucide-react';
 
 const INITIAL_TRANSACTIONS: Transaction[] = [
@@ -38,6 +46,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     receiptId: 'v2-hfHCxNVvrTgUZ3k1kOTg',
     accountNumber: '1000382106157',
     remark: 'MB Transfer',
+    balanceAfter: 9791.01,
   },
   {
     id: 'tx_1',
@@ -51,6 +60,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     receiptId: 'v2-a9KlxNVvrTgUZ3k8mOPq',
     accountNumber: '1000392819143',
     remark: 'MB transfer',
+    balanceAfter: 9796.01,
   },
   {
     id: 'tx_2',
@@ -64,6 +74,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     receiptId: 'v2-z7PqxNVvrTgUZ3k2bXZr',
     accountNumber: '1000066327314',
     remark: 'MB transfer',
+    balanceAfter: 4796.01,
   },
   {
     id: 'tx_3',
@@ -77,6 +88,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     receiptId: 'v2-m4YtxNVvrTgUZ3k9cLMk',
     accountNumber: '1000639261186',
     remark: 'MB transfer',
+    balanceAfter: 5646.01,
   },
   {
     id: 'tx_4',
@@ -89,6 +101,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     referenceId: 'FT26308HZ721',
     receiptId: 'v2-t2RvxNVvrTgUZ3k4eQWs',
     remark: 'Airtime Recharge',
+    balanceAfter: 6146.01,
   },
   {
     id: 'tx_5',
@@ -102,8 +115,19 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     receiptId: 'v2-w8UyxNVvrTgUZ3k6fJKu',
     accountNumber: '1000782917997',
     remark: 'Family Support',
+    balanceAfter: 6191.01,
   },
 ];
+
+const STORAGE_KEYS = {
+  BALANCE: 'cbe_balance_v2',
+  TRANSACTIONS: 'cbe_transactions_v2',
+  RECIPIENTS: 'cbe_recipients_v2',
+  USER_NAME: 'cbe_user_name_v2',
+  ACCOUNT_NAME: 'cbe_account_name_v2',
+  ACCOUNT_NUMBER: 'cbe_account_number_v2',
+  PIN: 'cbe_pin_v2',
+};
 
 export default function App() {
   const isAutostart =
@@ -114,22 +138,119 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
   const [activeBottomTab, setActiveBottomTab] = useState<'home' | 'transactions' | 'settings'>('home');
 
-  // User profile & Balance (matching user screenshot 9,791.01 ETB)
-  const [userName, setUserName] = useState<string>('Aymen Kemal Ali');
-  const [accountName, setAccountName] = useState<string>('Wadiah Ordinary');
-  const [accountNumber, setAccountNumber] = useState<string>('1000562339427');
-  const [balance, setBalance] = useState<number>(9791.01);
-  const [isBalanceMasked, setIsBalanceMasked] = useState<boolean>(false);
+  // User profile & Balance stored in mobile database (localStorage)
+  const [userName, setUserName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.USER_NAME);
+      if (saved) return saved;
+    }
+    return 'Aymen Kemal Ali';
+  });
+
+  const [accountName, setAccountName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.ACCOUNT_NAME);
+      if (saved) return saved;
+    }
+    return 'Wadiah Ordinary';
+  });
+
+  const [accountNumber, setAccountNumber] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.ACCOUNT_NUMBER);
+      if (saved) return saved;
+    }
+    return '1000562339427';
+  });
+
+  const [balance, setBalance] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.BALANCE);
+      if (saved !== null) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed)) return parsed;
+      }
+    }
+    return 9791.01;
+  });
+
+  // Always masked by default: "ሁሌ የገንዘብ መጠኑ ****** ይሁን እኔ ስነካው ብቻ ነው መታየት ያለበት ሁሉም"
+  const [isBalanceMasked, setIsBalanceMasked] = useState<boolean>(true);
   const [language, setLanguage] = useState<string>('English');
   const [copied, setCopied] = useState<boolean>(false);
 
   // Security PIN (default 0607, supports 4 or 6 digits)
-  const [currentPin, setCurrentPin] = useState<string>(DEFAULT_AUTH_PIN);
+  const [currentPin, setCurrentPin] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.PIN);
+      if (saved) return saved;
+    }
+    return DEFAULT_AUTH_PIN;
+  });
   const [pinLength, setPinLength] = useState<number>(4);
 
-  // Beneficiaries & Transactions
-  const [recipientsList, setRecipientsList] = useState<Recipient[]>(INITIAL_RECIPIENTS);
-  const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  // Beneficiaries & Transactions stored in mobile database (localStorage)
+  const [recipientsList, setRecipientsList] = useState<Recipient[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.RECIPIENTS);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (_) {}
+      }
+    }
+    return INITIAL_RECIPIENTS;
+  });
+
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (_) {}
+      }
+    }
+    return INITIAL_TRANSACTIONS;
+  });
+
+  // Persist balance changes to local database
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.BALANCE, balance.toString());
+    } catch (_) {}
+  }, [balance]);
+
+  // Persist transactions list to local database
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+    } catch (_) {}
+  }, [transactions]);
+
+  // Persist beneficiaries to local database
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.RECIPIENTS, JSON.stringify(recipientsList));
+    } catch (_) {}
+  }, [recipientsList]);
+
+  // Persist user profile and PIN to local database
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.USER_NAME, userName);
+      localStorage.setItem(STORAGE_KEYS.ACCOUNT_NAME, accountName);
+      localStorage.setItem(STORAGE_KEYS.ACCOUNT_NUMBER, accountNumber);
+    } catch (_) {}
+  }, [userName, accountName, accountNumber]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.PIN, currentPin);
+    } catch (_) {}
+  }, [currentPin]);
 
   // Transfer flow
   const [pendingTransfer, setPendingTransfer] = useState<{
@@ -148,6 +269,14 @@ export default function App() {
   const [isScanQrModalOpen, setIsScanQrModalOpen] = useState(false);
   const [isGovernmentModalOpen, setIsGovernmentModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isBalanceModalOpen, setIsBalanceModalOpen] = useState(false);
+  const [isAirtimeModalOpen, setIsAirtimeModalOpen] = useState(false);
+  const [isCbeBirrModalOpen, setIsCbeBirrModalOpen] = useState(false);
+  const [isBankingModalOpen, setIsBankingModalOpen] = useState(false);
+  const [isPayMerchantModalOpen, setIsPayMerchantModalOpen] = useState(false);
+  const [isTravelModalOpen, setIsTravelModalOpen] = useState(false);
+  const [isShoppingModalOpen, setIsShoppingModalOpen] = useState(false);
+  const [isEntertainmentModalOpen, setIsEntertainmentModalOpen] = useState(false);
 
   // Handlers
   const handleLoginSuccess = () => {
@@ -170,6 +299,44 @@ export default function App() {
     navigator.clipboard?.writeText(accountNumber);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Helper to record new activities with revealed balance tracking and immediate receipt
+  const recordNewTransaction = (
+    name: string,
+    amount: number,
+    category: string,
+    remark: string,
+    accNumber?: string
+  ) => {
+    const txId = generateTransactionId();
+    const rcptId = generateReceiptId();
+    const now = new Date();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dateFormatted = `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${String(
+      now.getFullYear()
+    ).slice(-2)} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+    const newBal = Math.max(0, balance - amount);
+    const newTx: Transaction = {
+      id: 'tx_' + Date.now(),
+      name,
+      date: dateFormatted,
+      timestamp: Date.now(),
+      amount,
+      type: 'debited',
+      category,
+      referenceId: txId,
+      receiptId: rcptId,
+      accountNumber: accNumber || '1000382106157',
+      remark,
+      balanceAfter: newBal,
+    };
+
+    setBalance(newBal);
+    setTransactions((prev) => [newTx, ...prev]);
+    setActiveReceiptTx(newTx);
+    setCurrentScreen('receipt');
   };
 
   // Transfer Step 1: user clicks Continue on Transfer screen -> opens Confirm modal
@@ -204,6 +371,7 @@ export default function App() {
         now.getFullYear()
       ).slice(-2)} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 
+      const newBal = Math.max(0, balance - amount);
       const newTx: Transaction = {
         id: 'tx_' + Date.now(),
         name: recipient.name,
@@ -216,9 +384,10 @@ export default function App() {
         receiptId: rcptId,
         accountNumber: recipient.accountNumber,
         remark: remark || 'MB Transfer',
+        balanceAfter: newBal,
       };
 
-      setBalance((prev) => prev - amount);
+      setBalance(newBal);
       setTransactions((prev) => [newTx, ...prev]);
       setActiveReceiptTx(newTx);
       setCurrentScreen('receipt');
@@ -267,6 +436,14 @@ export default function App() {
               copied={copied}
               onCopyAccount={handleCopyAccount}
               onOpenSettings={() => setIsSettingsModalOpen(true)}
+              onOpenBalanceModal={() => setIsBalanceModalOpen(true)}
+              onOpenAirtime={() => setIsAirtimeModalOpen(true)}
+              onOpenCbeBirr={() => setIsCbeBirrModalOpen(true)}
+              onOpenBankingServices={() => setIsBankingModalOpen(true)}
+              onOpenPayMerchant={() => setIsPayMerchantModalOpen(true)}
+              onOpenTravel={() => setIsTravelModalOpen(true)}
+              onOpenShopping={() => setIsShoppingModalOpen(true)}
+              onOpenEntertainment={() => setIsEntertainmentModalOpen(true)}
             />
           )}
 
@@ -287,6 +464,7 @@ export default function App() {
               onCopyAccount={handleCopyAccount}
               copied={copied}
               onOpenSettings={() => setIsSettingsModalOpen(true)}
+              onOpenBalanceModal={() => setIsBalanceModalOpen(true)}
             />
           )}
 
@@ -309,6 +487,7 @@ export default function App() {
               transaction={activeReceiptTx}
               senderName={userName}
               senderAccount={accountNumber}
+              remainingBalance={activeReceiptTx.balanceAfter !== undefined ? activeReceiptTx.balanceAfter : balance}
               onClose={() => {
                 setCurrentScreen('transactions');
                 setActiveBottomTab('transactions');
@@ -411,6 +590,7 @@ export default function App() {
           amount={pendingTransfer.amount}
           senderName={userName}
           senderAccount={accountNumber}
+          senderBalance={balance}
         />
       )}
 
@@ -477,6 +657,133 @@ export default function App() {
         recipientsList={recipientsList}
         onAddRecipient={handleAddRecipient}
         onDeleteRecipient={handleDeleteRecipient}
+      />
+
+      {/* Account Balance & Downward Details Modal */}
+      <AccountBalanceModal
+        isOpen={isBalanceModalOpen}
+        onClose={() => setIsBalanceModalOpen(false)}
+        balance={balance}
+        userName={userName}
+        accountName={accountName}
+        accountNumber={accountNumber}
+        onNavigateToTransactions={() => {
+          setIsBalanceModalOpen(false);
+          setCurrentScreen('transactions');
+          setActiveBottomTab('transactions');
+        }}
+        onNavigateToTransfer={() => {
+          setIsBalanceModalOpen(false);
+          setCurrentScreen('transfer');
+        }}
+      />
+
+      {/* Airtime & Packages Modal */}
+      <AirtimeModal
+        isOpen={isAirtimeModalOpen}
+        onClose={() => setIsAirtimeModalOpen(false)}
+        balance={balance}
+        onSuccessRecharge={(amount, phone, provider, packageType) => {
+          recordNewTransaction(
+            `${provider} Top-Up`,
+            amount,
+            'TOP-UP (AIRTIME & DATA RECHARGE)',
+            `${packageType} - ${phone}`,
+            phone
+          );
+        }}
+      />
+
+      {/* CBE Birr Wallet Services Modal */}
+      <CbeBirrModal
+        isOpen={isCbeBirrModalOpen}
+        onClose={() => setIsCbeBirrModalOpen(false)}
+        balance={balance}
+        onSuccessTransfer={(amount, phone, recipientName, serviceType) => {
+          recordNewTransaction(
+            recipientName,
+            amount,
+            'CBE BIRR TRANSFER',
+            `${serviceType} - ${phone}`,
+            phone
+          );
+        }}
+      />
+
+      {/* Banking Services Modal */}
+      <BankingServicesModal
+        isOpen={isBankingModalOpen}
+        onClose={() => setIsBankingModalOpen(false)}
+        balance={balance}
+        onNavigateToTransactions={() => {
+          setIsBankingModalOpen(false);
+          setCurrentScreen('transactions');
+          setActiveBottomTab('transactions');
+        }}
+      />
+
+      {/* Pay Merchant Modal */}
+      <PayMerchantModal
+        isOpen={isPayMerchantModalOpen}
+        onClose={() => setIsPayMerchantModalOpen(false)}
+        balance={balance}
+        onSuccessPayMerchant={(amount, merchantName, tillNumber) => {
+          recordNewTransaction(
+            merchantName,
+            amount,
+            'MERCHANT PAYMENT',
+            `Till: ${tillNumber}`,
+            tillNumber
+          );
+        }}
+      />
+
+      {/* Travel & Transport Modal */}
+      <TravelModal
+        isOpen={isTravelModalOpen}
+        onClose={() => setIsTravelModalOpen(false)}
+        balance={balance}
+        onSuccessPayTravel={(amount, serviceName, bookingRef) => {
+          recordNewTransaction(
+            serviceName,
+            amount,
+            'TRAVEL & TRANSPORT',
+            `Booking Ref: ${bookingRef}`,
+            bookingRef
+          );
+        }}
+      />
+
+      {/* Shopping & Retail Modal */}
+      <ShoppingModal
+        isOpen={isShoppingModalOpen}
+        onClose={() => setIsShoppingModalOpen(false)}
+        balance={balance}
+        onSuccessPayShopping={(amount, storeName, orderNumber) => {
+          recordNewTransaction(
+            storeName,
+            amount,
+            'SHOPPING & RETAIL',
+            `Order: ${orderNumber}`,
+            orderNumber
+          );
+        }}
+      />
+
+      {/* Entertainment & Tickets Modal */}
+      <EntertainmentModal
+        isOpen={isEntertainmentModalOpen}
+        onClose={() => setIsEntertainmentModalOpen(false)}
+        balance={balance}
+        onSuccessPayEntertainment={(amount, eventName, ticketCount) => {
+          recordNewTransaction(
+            eventName,
+            amount,
+            'ENTERTAINMENT & TICKETS',
+            `${ticketCount} Admission Ticket(s)`,
+            'CBE-TICKET'
+          );
+        }}
       />
     </PhoneFrame>
   );

@@ -18,6 +18,7 @@ interface TransactionsScreenProps {
   onCopyAccount: () => void;
   copied: boolean;
   onOpenSettings: () => void;
+  onOpenBalanceModal?: () => void;
 }
 
 export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
@@ -34,6 +35,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
   onCopyAccount,
   copied,
   onOpenSettings,
+  onOpenBalanceModal,
 }) => {
   const [filter, setFilter] = useState<'all' | TxType>('all');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -127,6 +129,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
           lastUpdated="06-Nov-26 10:52 PM"
           onCopyAccount={onCopyAccount}
           copied={copied}
+          onOpenBalanceModal={onOpenBalanceModal}
         />
       </div>
 
@@ -241,7 +244,7 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
                     </div>
                   </div>
 
-                  {/* Right: Amount + ETB + Small Caps Category Tag */}
+                  {/* Right: Amount + ETB + Small Caps Category Tag + Revealed Balance */}
                   <div className="text-right shrink-0 ml-2">
                     <div
                       className={`text-[13.5px] phone:text-[15.5px] font-bold font-mono leading-tight ${

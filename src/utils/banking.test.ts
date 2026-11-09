@@ -56,3 +56,12 @@ test('createActivityLog produces valid structured audit logs', () => {
   assert.equal(log.category, 'AUTH');
   assert.equal(log.status, 'SUCCESS');
 });
+
+test('calculateCharges returns zero fees matching CBE standard mobile transfers', () => {
+  const charges = calculateCharges(1000);
+  assert.equal(charges.serviceCharge, 0);
+  assert.equal(charges.vat, 0);
+  assert.equal(charges.disasterRecovery, 0);
+  assert.equal(charges.totalDebited, 1000);
+});
+

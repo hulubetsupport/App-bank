@@ -14,6 +14,7 @@ export interface Transaction {
   receiptId?: string;
   accountNumber?: string;
   remark?: string;
+  balanceAfter?: number;
 }
 
 export interface Recipient {

@@ -10,6 +10,7 @@ interface ConfirmModalProps {
   amount: number;
   senderName: string;
   senderAccount?: string;
+  senderBalance?: number;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -20,8 +21,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   amount,
   senderName,
   senderAccount = '1000562339427',
+  senderBalance = 9791.01,
 }) => {
   if (!isOpen) return null;
+
+  const remaining = Math.max(0, senderBalance - amount);
 
   return (
     <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-50 flex flex-col justify-end animate-in fade-in duration-200 select-none">
@@ -31,7 +35,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           Please Confirm
         </h3>
 
-        <div className="space-y-4 phone:space-y-5 bg-[#F7F7F9] rounded-[20px] phone:rounded-[24px] p-4 phone:p-5 border border-[#ECECEF]">
+        <div className="space-y-3.5 phone:space-y-4 bg-[#F7F7F9] rounded-[20px] phone:rounded-[24px] p-4 phone:p-5 border border-[#ECECEF]">
           <div className="flex items-start justify-between text-xs phone:text-sm">
             <span className="text-[#96939A] font-medium">From</span>
             <div className="text-right">
