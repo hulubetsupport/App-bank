@@ -1,7 +1,7 @@
 import React from 'react';
 import { Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { formatETB } from '../utils/banking.ts';
-import cbeLogo from '../assets/cbe-logo.svg';
+import cbeLogo from '../assets/cbe-logo.png';
 
 interface BankCardProps {
   balance: number;
@@ -93,13 +93,13 @@ export const BankCard: React.FC<BankCardProps> = ({
 
         {/* 1. Header: Gold CBE Logo + Bank Name + Subtitle */}
         <div className="relative flex items-center gap-3 phone:gap-3.5">
-          <div className="w-[42px] h-[42px] phone:w-[48px] phone:h-[48px] rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-black/30 p-0.5 border border-[#D4B15C]/30 shadow-inner">
+          <div className="w-[44px] h-[44px] phone:w-[50px] phone:h-[50px] shrink-0 flex items-center justify-center">
             <img
               src={cbeLogo}
               alt="Commercial Bank of Ethiopia"
-              className="w-full h-full object-contain rounded-full"
+              className="w-full h-full object-contain filter drop-shadow-sm"
               onError={(e) => {
-                e.currentTarget.src = './cbe-logo.svg';
+                e.currentTarget.src = './cbe-logo.png';
               }}
             />
           </div>

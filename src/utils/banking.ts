@@ -100,7 +100,7 @@ export function createActivityLog(
   };
 }
 
-export const OFFICIAL_CBE_LOGO = './cbe-logo.svg';
+export const OFFICIAL_CBE_LOGO = './cbe-logo.png';
 
 export const INITIAL_RECIPIENTS: Recipient[] = [
   {

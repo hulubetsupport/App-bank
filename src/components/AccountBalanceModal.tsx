@@ -11,7 +11,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { formatETB } from '../utils/banking.ts';
-import cbeLogo from '../assets/cbe-logo.svg';
+import cbeLogo from '../assets/cbe-logo.png';
 
 interface AccountBalanceModalProps {
   isOpen: boolean;
@@ -84,8 +84,8 @@ export const AccountBalanceModal: React.FC<AccountBalanceModalProps> = ({
           <div className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#171717] via-[#222222] to-[#2B3544] p-5 text-white shadow-md border border-white/10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-black/40 p-0.5 border border-[#D4B15C]/40 flex items-center justify-center">
-                  <img src={cbeLogo} alt="CBE" className="w-full h-full object-contain rounded-full" />
+                <div className="w-10 h-10 shrink-0 flex items-center justify-center">
+                  <img src={cbeLogo} alt="CBE" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <div className="text-[11px] text-[#E8D184] font-medium leading-none">Commercial Bank of Ethiopia</div>

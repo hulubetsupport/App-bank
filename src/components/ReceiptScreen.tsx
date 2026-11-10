@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Transaction } from '../types/index.ts';
 import { formatETB } from '../utils/banking.ts';
-import cbeLogo from '../assets/cbe-logo.svg';
+import cbeLogo from '../assets/cbe-logo.png';
 import QRCode from 'qrcode';
 
 interface ReceiptScreenProps {
@@ -143,13 +143,13 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
 
           {/* CBE Bank Footer */}
           <div className="pt-3 phone:pt-4 border-t border-dashed border-[#ECECEF] flex items-center gap-2.5 phone:gap-3">
-            <div className="w-9 h-9 phone:w-11 phone:h-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-black/10 p-0.5">
+            <div className="w-10 h-10 phone:w-12 phone:h-12 shrink-0 flex items-center justify-center">
               <img
                 src={cbeLogo}
                 alt="Commercial Bank of Ethiopia"
-                className="w-full h-full object-contain rounded-full"
+                className="w-full h-full object-contain"
                 onError={(e) => {
-                  e.currentTarget.src = './cbe-logo.svg';
+                  e.currentTarget.src = './cbe-logo.png';
                 }}
               />
             </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Bell, LayoutGrid, Lock, Fingerprint, ArrowRight, Globe } from 'lucide-react';
 import { validatePassword } from '../utils/banking.ts';
-import cbeLogo from '../assets/cbe-logo.svg';
+import cbeLogo from '../assets/cbe-logo.png';
 
 interface LoginScreenProps {
   onLoginSuccess: (method: 'PIN' | 'BIOMETRIC') => void;
@@ -100,17 +100,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       {/* Main Branding Section */}
       <div className="flex flex-col items-center text-center my-auto py-1">
         {/* CBE Golden Logo */}
-        <div className="relative mb-3 phone:mb-4">
-          <div className="w-24 h-24 phone:w-28 phone:h-28 rounded-full overflow-hidden flex items-center justify-center p-1 bg-white border border-[#D4B15C]/25 shadow-md">
-            <img
-              src={cbeLogo}
-              alt="Commercial Bank of Ethiopia Emblem"
-              className="w-full h-full object-contain"
-              onError={(e) => {
-                e.currentTarget.src = './cbe-logo.svg';
-              }}
-            />
-          </div>
+        <div className="relative mb-2 phone:mb-3 flex items-center justify-center">
+          <img
+            src={cbeLogo}
+            alt="Commercial Bank of Ethiopia Emblem"
+            className="w-28 h-28 phone:w-32 phone:h-32 object-contain drop-shadow-md"
+            onError={(e) => {
+              e.currentTarget.src = './cbe-logo.png';
+            }}
+          />
         </div>
 
         <h1 className="text-[20px] phone:text-[23px] font-bold text-[#D4B15C] tracking-wide">
