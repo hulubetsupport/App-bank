@@ -15,6 +15,26 @@ export interface Transaction {
   accountNumber?: string;
   remark?: string;
   balanceAfter?: number;
+  serviceCharge?: number;
+  vat?: number;
+  disasterRecovery?: number;
+}
+
+export interface AccountProfile {
+  id: string;
+  accountName: string;
+  accountNumber: string;
+  balance: number;
+}
+
+export interface DeveloperSettings {
+  defaultBalanceMasked: boolean;
+  transferDelayMs: number;
+  applyStandardFees: boolean;
+  biometricsEnabled: boolean;
+  cardLastUpdated: string;
+  autoLiveTimestamp: boolean;
+  showCardWorldMap: boolean;
 }
 
 export interface Recipient {

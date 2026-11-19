@@ -27,7 +27,7 @@ export const TravelModal: React.FC<TravelModalProps> = ({
   const [category, setCategory] = useState<'flight' | 'train' | 'bus' | 'ride'>('flight');
   const [provider, setProvider] = useState('Ethiopian Airlines');
   const [bookingRef, setBookingRef] = useState('ET-892401');
-  const [passengerName, setPassengerName] = useState('Aymen Kemal Ali');
+  const [passengerName, setPassengerName] = useState('Seid Mohammed Jemal');
   const [amount, setAmount] = useState('3450');
   const [isSubmitting, setIsSubmitting] = useState(false);
 

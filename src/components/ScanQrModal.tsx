@@ -79,7 +79,7 @@ export const ScanQrModal: React.FC<ScanQrModalProps> = ({
             onClick={() => handleSimulateScan(INITIAL_RECIPIENTS[0])}
             className="px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-semibold transition active:scale-95"
           >
-            {INITIAL_RECIPIENTS[0]?.name || 'Sara Endris'}
+            {INITIAL_RECIPIENTS[0]?.name || 'Dawit Bekele Tadesse'}
           </button>
           {INITIAL_RECIPIENTS[1] && (
             <button

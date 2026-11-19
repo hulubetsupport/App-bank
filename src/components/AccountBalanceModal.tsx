@@ -82,7 +82,17 @@ export const AccountBalanceModal: React.FC<AccountBalanceModalProps> = ({
         <div className="flex-1 overflow-y-auto no-scrollbar p-5 phone:p-6 space-y-4">
           {/* Gold & Dark Card Balance Summary */}
           <div className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-[#171717] via-[#222222] to-[#2B3544] p-5 text-white shadow-md border border-white/10">
-            <div className="flex items-center justify-between">
+            <img
+              src="./assets/aistudio/images__8__5a7a5f2c.jpeg"
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-[0.16] invert contrast-150 mix-blend-screen scale-[1.06] pointer-events-none select-none"
+              onError={(e) => {
+                e.currentTarget.src = '/assets/aistudio/images__8__5a7a5f2c.jpeg';
+              }}
+            />
+
+            <div className="relative flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 shrink-0 flex items-center justify-center">
                   <img src={cbeLogo} alt="CBE" className="w-full h-full object-contain" />
@@ -98,7 +108,7 @@ export const AccountBalanceModal: React.FC<AccountBalanceModalProps> = ({
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/10">
+            <div className="relative mt-4 pt-3 border-t border-white/10">
               <div className="text-[11px] text-white/70 uppercase tracking-wider font-semibold">Available Balance</div>
               <div className="flex items-baseline gap-1.5 mt-1">
                 <span className="text-[28px] phone:text-[32px] font-bold text-white font-sans tracking-tight">

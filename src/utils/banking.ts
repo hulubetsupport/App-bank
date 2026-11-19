@@ -1,9 +1,19 @@
-import { Recipient, ActivityLog } from '../types/index.ts';
+import { Recipient, ActivityLog, Transaction, TxType, DeveloperSettings } from '../types/index.ts';
 
 /**
  * Real password specified by user is "0607" (supports 4 or 6 digits, configurable in Settings).
  */
 export const DEFAULT_AUTH_PIN = '0607';
+
+export const DEFAULT_DEVELOPER_SETTINGS: DeveloperSettings = {
+  defaultBalanceMasked: true,
+  transferDelayMs: 1800,
+  applyStandardFees: false,
+  biometricsEnabled: true,
+  cardLastUpdated: '06 Nov 2026 • 10:52 PM',
+  autoLiveTimestamp: false,
+  showCardWorldMap: true,
+};
 
 export function validatePassword(enteredPin: string, correctPin = DEFAULT_AUTH_PIN): boolean {
   if (!enteredPin) return false;
@@ -15,6 +25,32 @@ export function formatETB(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+}
+
+export function formatCardTimestamp(date: Date = new Date()): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  const timeStr = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return `${day} ${month} ${year} • ${timeStr}`;
+}
+
+export function formatTransactionDate(date: Date = new Date()): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = months[date.getMonth()];
+  const year = String(date.getFullYear()).slice(-2);
+  const timeStr = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return `${day}-${month}-${year} ${timeStr}`;
 }
 
 export function maskAccountNumber(acc: string): string {
@@ -36,11 +72,19 @@ export function searchRecipients(query: string, recipients: Recipient[]): Recipi
   });
 }
 
-export function calculateCharges(amount: number) {
-  const serviceCharge = 0.0;
-  const vat = 0.0;
-  const disasterRecovery = 0.0;
-  const totalDebited = amount + serviceCharge + vat + disasterRecovery;
+export function calculateCharges(amount: number, applyStandardFees = false) {
+  if (!applyStandardFees) {
+    return {
+      serviceCharge: 0.0,
+      vat: 0.0,
+      disasterRecovery: 0.0,
+      totalDebited: amount,
+    };
+  }
+  const serviceCharge = Number(Math.min(15, Math.max(2, amount * 0.002)).toFixed(2));
+  const vat = Number((serviceCharge * 0.15).toFixed(2));
+  const disasterRecovery = Number((serviceCharge * 0.05).toFixed(2));
+  const totalDebited = Number((amount + serviceCharge + vat + disasterRecovery).toFixed(2));
 
   return {
     serviceCharge,
@@ -66,6 +110,45 @@ export function generateReceiptId(): string {
     res += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return res;
+}
+
+export function createCustomTransaction(input: {
+  name: string;
+  amount: number;
+  type: TxType;
+  category?: string;
+  accountNumber?: string;
+  remark?: string;
+  date?: string;
+  referenceId?: string;
+  receiptId?: string;
+  balanceAfter?: number;
+  serviceCharge?: number;
+  vat?: number;
+  disasterRecovery?: number;
+}): Transaction {
+  const now = Date.now();
+  return {
+    id: `tx_${now}_${Math.random().toString(36).slice(2, 6)}`,
+    name: input.name.trim(),
+    date: input.date?.trim() || formatTransactionDate(),
+    timestamp: now,
+    amount: Number(input.amount.toFixed(2)),
+    type: input.type,
+    category: (input.category || 'ACCOUNT TO ACCOUNT').trim().toUpperCase(),
+    referenceId: input.referenceId?.trim() || generateTransactionId(),
+    receiptId: input.receiptId?.trim() || generateReceiptId(),
+    accountNumber: input.accountNumber?.trim() || '1000614289312',
+    remark: input.remark?.trim() || 'MB Transfer',
+    balanceAfter: input.balanceAfter,
+    serviceCharge: input.serviceCharge ?? 0,
+    vat: input.vat ?? 0,
+    disasterRecovery: input.disasterRecovery ?? 0,
+  };
+}
+
+export function removeTransactionById(transactions: Transaction[], id: string): Transaction[] {
+  return transactions.filter((tx) => tx.id !== id);
 }
 
 export function createActivityLog(
@@ -104,75 +187,75 @@ export const OFFICIAL_CBE_LOGO = './cbe-logo.png';
 
 export const INITIAL_RECIPIENTS: Recipient[] = [
   {
-    name: 'Sara Endris Ali',
-    accountNumber: '1000293813474',
-    masked: '1*********3474',
-    initials: 'SE',
+    name: 'Dawit Bekele Tadesse',
+    accountNumber: '1000614289312',
+    masked: '1*********9312',
+    initials: 'DB',
   },
   {
-    name: 'Aminat Hassen Mohammed',
-    accountNumber: '1000782917997',
-    masked: '1*********7997',
-    initials: 'AH',
-  },
-  {
-    name: 'Habib Yimam Ahmed',
-    accountNumber: '1000192810164',
-    masked: '1*********0164',
-    initials: 'HY',
-  },
-  {
-    name: 'Yisak Hailu Desalegn',
-    accountNumber: '1000293810588',
-    masked: '1*********0588',
-    initials: 'YH',
-  },
-  {
-    name: 'Henok Dessie Assefa',
-    accountNumber: '1000392813114',
-    masked: '1*********3114',
-    initials: 'HD',
-  },
-  {
-    name: 'Desalegn Sitotaw Embiyalew',
-    accountNumber: '1000492815123',
-    masked: '1*********5123',
-    initials: 'DS',
-  },
-  {
-    name: 'Bilal Seid Abdu',
-    accountNumber: '1000382106157',
-    masked: '1*********6157',
-    initials: 'BA',
-  },
-  {
-    name: 'Abdu Mohammed Yimer',
-    accountNumber: '1000639261186',
-    masked: '1*********1186',
-    initials: 'AM',
-  },
-  {
-    name: 'Tsegaye Abebe Berihun',
-    accountNumber: '1000066327314',
-    masked: '1*********7314',
+    name: 'Tigist Alemu Kebede',
+    accountNumber: '1000482910534',
+    masked: '1*********0534',
     initials: 'TA',
   },
   {
-    name: 'Sualih Hussen Mohammed',
-    accountNumber: '1000134189677',
-    masked: '1*********9677',
-    initials: 'SM',
+    name: 'Yohannes Girma Tesfaye',
+    accountNumber: '1000531746208',
+    masked: '1*********6208',
+    initials: 'YG',
   },
   {
-    name: 'Deguale Shmels Amare',
-    accountNumber: '1000723915434',
-    masked: '1*********5434',
-    initials: 'DS',
+    name: 'Mekdes Hailu Worku',
+    accountNumber: '1000793104826',
+    masked: '1*********4826',
+    initials: 'MH',
   },
   {
-    name: 'Nebiyu Mohammed Ahmed',
-    accountNumber: '1000415518599',
-    masked: '1*********8599',
-    initials: 'NM',
+    name: 'Bereket Assefa Desta',
+    accountNumber: '1000648219305',
+    masked: '1*********9305',
+    initials: 'BA',
+  },
+  {
+    name: 'Selamawit Tekle Gebre',
+    accountNumber: '1000825193641',
+    masked: '1*********3641',
+    initials: 'ST',
+  },
+  {
+    name: 'Binyam Negash Fikru',
+    accountNumber: '1000376402819',
+    masked: '1*********2819',
+    initials: 'BN',
+  },
+  {
+    name: 'Hanna Getachew Solomon',
+    accountNumber: '1000912837452',
+    masked: '1*********7452',
+    initials: 'HG',
+  },
+  {
+    name: 'Elias Tesfaye Mulugeta',
+    accountNumber: '1000458921736',
+    masked: '1*********1736',
+    initials: 'ET',
+  },
+  {
+    name: 'Rahel Shiferaw Demissie',
+    accountNumber: '1000729405813',
+    masked: '1*********5813',
+    initials: 'RS',
+  },
+  {
+    name: 'Kaleb Ayele Wondimu',
+    accountNumber: '1000591384270',
+    masked: '1*********4270',
+    initials: 'KA',
+  },
+  {
+    name: 'Mahlet Teshome Abera',
+    accountNumber: '1000664029518',
+    masked: '1*********9518',
+    initials: 'MT',
   },
 ];

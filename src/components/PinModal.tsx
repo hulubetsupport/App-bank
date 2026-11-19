@@ -19,29 +19,39 @@ export const PinModal: React.FC<PinModalProps> = ({
 }) => {
   const [pin, setPin] = useState('');
   const [errorText, setErrorText] = useState('');
+  const onSuccessRef = React.useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setPin('');
+      setErrorText('');
+    }
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    if (!isOpen || pin.length !== pinLength) return;
+    if (validatePassword(pin, correctPin)) {
+      const t = setTimeout(() => {
+        setPin('');
+        onSuccessRef.current();
+      }, 120);
+      return () => clearTimeout(t);
+    } else {
+      setErrorText('Incorrect PIN');
+      const t = setTimeout(() => {
+        setPin('');
+        setErrorText('');
+      }, 600);
+      return () => clearTimeout(t);
+    }
+  }, [pin, pinLength, correctPin, isOpen]);
 
   if (!isOpen) return null;
 
   const handleDigit = (digit: string) => {
     setErrorText('');
-    if (pin.length < pinLength) {
-      const next = pin + digit;
-      setPin(next);
-      if (next.length === pinLength) {
-        if (validatePassword(next, correctPin)) {
-          setTimeout(() => {
-            setPin('');
-            onSuccess();
-          }, 150);
-        } else {
-          setErrorText('Incorrect PIN');
-          setTimeout(() => {
-            setPin('');
-            setErrorText('');
-          }, 600);
-        }
-      }
-    }
+    setPin((prev) => (prev.length < pinLength ? prev + digit : prev));
   };
 
   const handleDelete = () => {

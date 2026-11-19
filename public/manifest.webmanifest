@@ -8,6 +8,11 @@
   "theme_color": "#7C21A4",
   "icons": [
     {
+      "src": "./assets/aistudio/Cbe_logo_for_icon_4493ecca.jpeg",
+      "sizes": "448x448",
+      "type": "image/jpeg"
+    },
+    {
       "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png"

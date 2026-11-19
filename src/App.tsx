@@ -3,12 +3,21 @@ import {
   ScreenType,
   Transaction,
   Recipient,
+  DeveloperSettings,
+  AccountProfile,
+  ActivityLog,
 } from './types/index.ts';
 import {
   generateTransactionId,
   generateReceiptId,
   INITIAL_RECIPIENTS,
   DEFAULT_AUTH_PIN,
+  DEFAULT_DEVELOPER_SETTINGS,
+  calculateCharges,
+  createActivityLog,
+  formatCardTimestamp,
+  formatTransactionDate,
+  removeTransactionById,
 } from './utils/banking.ts';
 import { PhoneFrame } from './components/PhoneFrame.tsx';
 import { LoginScreen } from './components/LoginScreen.tsx';
@@ -35,8 +44,8 @@ import { Home, Landmark, Settings } from 'lucide-react';
 
 const INITIAL_TRANSACTIONS: Transaction[] = [
   {
-    id: 'tx_bilal',
-    name: 'Bilal Seid',
+    id: 'tx_dawit',
+    name: 'Dawit Bekele Tadesse',
     date: '06-Nov-26 10:54 PM',
     timestamp: Date.now() - 120000,
     amount: 5.0,
@@ -44,13 +53,16 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26311KH4GH',
     receiptId: 'v2-hfHCxNVvrTgUZ3k1kOTg',
-    accountNumber: '1000382106157',
+    accountNumber: '1000614289312',
     remark: 'MB Transfer',
     balanceAfter: 9791.01,
+    serviceCharge: 0,
+    vat: 0,
+    disasterRecovery: 0,
   },
   {
     id: 'tx_1',
-    name: 'Sofiya Seid',
+    name: 'Tigist Alemu Kebede',
     date: '05-Nov-26 12:44 PM',
     timestamp: Date.now() - 3600000,
     amount: 5000.0,
@@ -58,13 +70,13 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26309HZ114',
     receiptId: 'v2-a9KlxNVvrTgUZ3k8mOPq',
-    accountNumber: '1000392819143',
+    accountNumber: '1000482910534',
     remark: 'MB transfer',
     balanceAfter: 9796.01,
   },
   {
     id: 'tx_2',
-    name: 'Tsegaye Abebe',
+    name: 'Yohannes Girma Tesfaye',
     date: '05-Nov-26 12:12 PM',
     timestamp: Date.now() - 7200000,
     amount: 850.0,
@@ -72,13 +84,13 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26309HZ9G2',
     receiptId: 'v2-z7PqxNVvrTgUZ3k2bXZr',
-    accountNumber: '1000066327314',
+    accountNumber: '1000531746208',
     remark: 'MB transfer',
     balanceAfter: 4796.01,
   },
   {
     id: 'tx_3',
-    name: 'Abdu Mohammed',
+    name: 'Mekdes Hailu Worku',
     date: '05-Nov-26 11:14 AM',
     timestamp: Date.now() - 10800000,
     amount: 500.0,
@@ -86,7 +98,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26309HZ882',
     receiptId: 'v2-m4YtxNVvrTgUZ3k9cLMk',
-    accountNumber: '1000639261186',
+    accountNumber: '1000793104826',
     remark: 'MB transfer',
     balanceAfter: 5646.01,
   },
@@ -105,7 +117,7 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
   },
   {
     id: 'tx_5',
-    name: 'Aminat Mohammed',
+    name: 'Bereket Assefa Desta',
     date: '04-Nov-26 7:39 PM',
     timestamp: Date.now() - 90000000,
     amount: 2000.0,
@@ -113,20 +125,30 @@ const INITIAL_TRANSACTIONS: Transaction[] = [
     category: 'ACCOUNT TO ACCOUNT',
     referenceId: 'FT26308HZ643',
     receiptId: 'v2-w8UyxNVvrTgUZ3k6fJKu',
-    accountNumber: '1000782917997',
+    accountNumber: '1000648219305',
     remark: 'Family Support',
     balanceAfter: 6191.01,
   },
 ];
 
+const DEFAULT_SECONDARY_ACCOUNT: AccountProfile = {
+  id: 'acc_secondary',
+  accountName: 'Wadiah Staff Sa',
+  accountNumber: '1000839412784',
+  balance: 14250.5,
+};
+
 const STORAGE_KEYS = {
   BALANCE: 'cbe_balance_v2',
-  TRANSACTIONS: 'cbe_transactions_v2',
-  RECIPIENTS: 'cbe_recipients_v2',
-  USER_NAME: 'cbe_user_name_v2',
+  TRANSACTIONS: 'cbe_transactions_v3',
+  RECIPIENTS: 'cbe_recipients_v3',
+  USER_NAME: 'cbe_user_name_v3',
   ACCOUNT_NAME: 'cbe_account_name_v2',
-  ACCOUNT_NUMBER: 'cbe_account_number_v2',
+  ACCOUNT_NUMBER: 'cbe_account_number_v3',
   PIN: 'cbe_pin_v2',
+  DEV_SETTINGS: 'cbe_dev_settings_v2',
+  SECONDARY_ACCOUNT: 'cbe_secondary_account_v3',
+  ACTIVITY_LOGS: 'cbe_activity_logs_v2',
 };
 
 export default function App() {
@@ -137,14 +159,28 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(isAutostart);
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
   const [activeBottomTab, setActiveBottomTab] = useState<'home' | 'transactions' | 'settings'>('home');
+  const [activeAccountIndex, setActiveAccountIndex] = useState<number>(0);
 
-  // User profile & Balance stored in mobile database (localStorage)
+  // Developer Settings
+  const [developerSettings, setDeveloperSettings] = useState<DeveloperSettings>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.DEV_SETTINGS);
+      if (saved) {
+        try {
+          return { ...DEFAULT_DEVELOPER_SETTINGS, ...JSON.parse(saved) };
+        } catch (_) {}
+      }
+    }
+    return DEFAULT_DEVELOPER_SETTINGS;
+  });
+
+  // User profile & Primary Balance
   const [userName, setUserName] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEYS.USER_NAME);
       if (saved) return saved;
     }
-    return 'Aymen Kemal Ali';
+    return 'Seid Mohammed Jemal';
   });
 
   const [accountName, setAccountName] = useState<string>(() => {
@@ -160,7 +196,7 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.ACCOUNT_NUMBER);
       if (saved) return saved;
     }
-    return '1000562339427';
+    return '1000758204567';
   });
 
   const [balance, setBalance] = useState<number>(() => {
@@ -174,12 +210,24 @@ export default function App() {
     return 9791.01;
   });
 
-  // Always masked by default: "ሁሌ የገንዘብ መጠኑ ****** ይሁን እኔ ስነካው ብቻ ነው መታየት ያለበት ሁሉም"
-  const [isBalanceMasked, setIsBalanceMasked] = useState<boolean>(true);
+  const [secondaryAccount, setSecondaryAccount] = useState<AccountProfile>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.SECONDARY_ACCOUNT);
+      if (saved) {
+        try {
+          return { ...DEFAULT_SECONDARY_ACCOUNT, ...JSON.parse(saved) };
+        } catch (_) {}
+      }
+    }
+    return DEFAULT_SECONDARY_ACCOUNT;
+  });
+
+  const [isBalanceMasked, setIsBalanceMasked] = useState<boolean>(
+    developerSettings.defaultBalanceMasked
+  );
   const [language, setLanguage] = useState<string>('English');
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Security PIN (default 0607, supports 4 or 6 digits)
   const [currentPin, setCurrentPin] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEYS.PIN);
@@ -187,16 +235,17 @@ export default function App() {
     }
     return DEFAULT_AUTH_PIN;
   });
-  const [pinLength, setPinLength] = useState<number>(4);
+  const [pinLength, setPinLength] = useState<number>(() =>
+    currentPin.length === 6 ? 6 : 4
+  );
 
-  // Beneficiaries & Transactions stored in mobile database (localStorage)
   const [recipientsList, setRecipientsList] = useState<Recipient[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(STORAGE_KEYS.RECIPIENTS);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed)) return parsed;
         } catch (_) {}
       }
     }
@@ -209,35 +258,54 @@ export default function App() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed)) return parsed;
         } catch (_) {}
       }
     }
     return INITIAL_TRANSACTIONS;
   });
 
-  // Persist balance changes to local database
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOGS);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (_) {}
+      }
+    }
+    return [createActivityLog('SESSION_INIT', 'SYSTEM', 'CBE Mobile Banking initialized')];
+  });
+
+  const appendLog = (
+    action: string,
+    category: ActivityLog['category'],
+    details: string,
+    status: ActivityLog['status'] = 'SUCCESS'
+  ) => {
+    setActivityLogs((prev) => [createActivityLog(action, category, details, status), ...prev].slice(0, 50));
+  };
+
+  // Persist states to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.BALANCE, balance.toString());
     } catch (_) {}
   }, [balance]);
 
-  // Persist transactions list to local database
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
     } catch (_) {}
   }, [transactions]);
 
-  // Persist beneficiaries to local database
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.RECIPIENTS, JSON.stringify(recipientsList));
     } catch (_) {}
   }, [recipientsList]);
 
-  // Persist user profile and PIN to local database
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.USER_NAME, userName);
@@ -252,7 +320,41 @@ export default function App() {
     } catch (_) {}
   }, [currentPin]);
 
-  // Transfer flow
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.DEV_SETTINGS, JSON.stringify(developerSettings));
+    } catch (_) {}
+  }, [developerSettings]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.SECONDARY_ACCOUNT, JSON.stringify(secondaryAccount));
+    } catch (_) {}
+  }, [secondaryAccount]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOGS, JSON.stringify(activityLogs));
+    } catch (_) {}
+  }, [activityLogs]);
+
+  // Derived active account list
+  const accountsList: AccountProfile[] = [
+    {
+      id: 'acc_primary',
+      accountName,
+      accountNumber,
+      balance,
+    },
+    secondaryAccount,
+  ];
+  const activeAccount = accountsList[activeAccountIndex] || accountsList[0];
+
+  const cardTimestamp = developerSettings.autoLiveTimestamp
+    ? formatCardTimestamp()
+    : developerSettings.cardLastUpdated;
+
+  // Transfer & modal state
   const [pendingTransfer, setPendingTransfer] = useState<{
     recipient: Recipient;
     amount: number;
@@ -262,7 +364,6 @@ export default function App() {
   const [activeReceiptTx, setActiveReceiptTx] = useState<Transaction | null>(null);
   const [activeDetailTx, setActiveDetailTx] = useState<Transaction | null>(null);
 
-  // Modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
@@ -278,17 +379,19 @@ export default function App() {
   const [isShoppingModalOpen, setIsShoppingModalOpen] = useState(false);
   const [isEntertainmentModalOpen, setIsEntertainmentModalOpen] = useState(false);
 
-  // Handlers
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (method: 'PIN' | 'BIOMETRIC') => {
     setIsAuthenticated(true);
     setCurrentScreen('home');
     setActiveBottomTab('home');
+    setIsBalanceMasked(developerSettings.defaultBalanceMasked);
+    appendLog('LOGIN_SUCCESS', 'AUTH', `Authenticated using ${method}`);
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setIsSettingsModalOpen(false);
     setCurrentScreen('login');
+    appendLog('LOGOUT', 'AUTH', 'User signed out & locked app');
   };
 
   const handleToggleLanguage = () => {
@@ -296,12 +399,19 @@ export default function App() {
   };
 
   const handleCopyAccount = () => {
-    navigator.clipboard?.writeText(accountNumber);
+    navigator.clipboard?.writeText(activeAccount.accountNumber);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Helper to record new activities with revealed balance tracking and immediate receipt
+  const updateActiveAccountBalance = (newBal: number) => {
+    if (activeAccountIndex === 0) {
+      setBalance(newBal);
+    } else {
+      setSecondaryAccount((prev) => ({ ...prev, balance: newBal }));
+    }
+  };
+
   const recordNewTransaction = (
     name: string,
     amount: number,
@@ -309,49 +419,43 @@ export default function App() {
     remark: string,
     accNumber?: string
   ) => {
-    const txId = generateTransactionId();
-    const rcptId = generateReceiptId();
-    const now = new Date();
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const dateFormatted = `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${String(
-      now.getFullYear()
-    ).slice(-2)} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-
-    const newBal = Math.max(0, balance - amount);
+    const charges = calculateCharges(amount, developerSettings.applyStandardFees);
+    const newBal = Math.max(0, Number((activeAccount.balance - charges.totalDebited).toFixed(2)));
     const newTx: Transaction = {
       id: 'tx_' + Date.now(),
       name,
-      date: dateFormatted,
+      date: formatTransactionDate(),
       timestamp: Date.now(),
       amount,
       type: 'debited',
       category,
-      referenceId: txId,
-      receiptId: rcptId,
-      accountNumber: accNumber || '1000382106157',
+      referenceId: generateTransactionId(),
+      receiptId: generateReceiptId(),
+      accountNumber: accNumber || '1000614289312',
       remark,
       balanceAfter: newBal,
+      serviceCharge: charges.serviceCharge,
+      vat: charges.vat,
+      disasterRecovery: charges.disasterRecovery,
     };
 
-    setBalance(newBal);
+    updateActiveAccountBalance(newBal);
     setTransactions((prev) => [newTx, ...prev]);
     setActiveReceiptTx(newTx);
     setCurrentScreen('receipt');
+    appendLog('SERVICE_PAYMENT', 'TRANSACTION', `${category}: ${amount} ETB to ${name}`);
   };
 
-  // Transfer Step 1: user clicks Continue on Transfer screen -> opens Confirm modal
   const handleInitiateTransfer = (recipient: Recipient, amount: number, remark: string) => {
     setPendingTransfer({ recipient, amount, remark });
     setIsConfirmModalOpen(true);
   };
 
-  // Transfer Step 2: user clicks Continue on Confirm modal -> opens PIN modal
   const handleConfirmTransfer = () => {
     setIsConfirmModalOpen(false);
     setIsPinModalOpen(true);
   };
 
-  // Transfer Step 3: PIN is confirmed -> show 360° purple rotating circle loader for 1.8s, then open receipt!
   const handleExecuteTransfer = () => {
     setIsPinModalOpen(false);
     if (!pendingTransfer) return;
@@ -362,50 +466,84 @@ export default function App() {
       setIsProcessingTransfer(false);
 
       const { recipient, amount, remark } = pendingTransfer;
-      const txId = generateTransactionId();
-      const rcptId = generateReceiptId();
-
-      const now = new Date();
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const dateFormatted = `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${String(
-        now.getFullYear()
-      ).slice(-2)} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-
-      const newBal = Math.max(0, balance - amount);
+      const charges = calculateCharges(amount, developerSettings.applyStandardFees);
+      const newBal = Math.max(0, Number((activeAccount.balance - charges.totalDebited).toFixed(2)));
       const newTx: Transaction = {
         id: 'tx_' + Date.now(),
         name: recipient.name,
-        date: dateFormatted,
+        date: formatTransactionDate(),
         timestamp: Date.now(),
         amount,
         type: 'debited',
         category: 'ACCOUNT TO ACCOUNT',
-        referenceId: txId,
-        receiptId: rcptId,
+        referenceId: generateTransactionId(),
+        receiptId: generateReceiptId(),
         accountNumber: recipient.accountNumber,
         remark: remark || 'MB Transfer',
         balanceAfter: newBal,
+        serviceCharge: charges.serviceCharge,
+        vat: charges.vat,
+        disasterRecovery: charges.disasterRecovery,
       };
 
-      setBalance(newBal);
+      updateActiveAccountBalance(newBal);
       setTransactions((prev) => [newTx, ...prev]);
       setActiveReceiptTx(newTx);
       setCurrentScreen('receipt');
-    }, 1800);
+      appendLog('TRANSFER_SUCCESS', 'TRANSACTION', `Transferred ${amount} ETB to ${recipient.name}`);
+    }, developerSettings.transferDelayMs);
   };
 
-  // Adding and deleting beneficiaries from settings
   const handleAddRecipient = (rec: Recipient) => {
     setRecipientsList((prev) => [rec, ...prev]);
+    appendLog('BENEFICIARY_ADDED', 'SETTINGS', `Added ${rec.name} (${rec.accountNumber})`);
   };
 
   const handleDeleteRecipient = (accNumber: string) => {
     setRecipientsList((prev) => prev.filter((r) => r.accountNumber !== accNumber));
+    appendLog('BENEFICIARY_REMOVED', 'SETTINGS', `Removed account ${accNumber}`);
+  };
+
+  const handleAddCustomTransaction = (tx: Transaction, adjustBalance: boolean) => {
+    setTransactions((prev) => [tx, ...prev]);
+    if (adjustBalance) {
+      const nextBal =
+        tx.type === 'credited'
+          ? Number((activeAccount.balance + tx.amount).toFixed(2))
+          : Math.max(0, Number((activeAccount.balance - tx.amount).toFixed(2)));
+      updateActiveAccountBalance(nextBal);
+    }
+    appendLog('CUSTOM_TX_ADDED', 'SETTINGS', `${tx.type.toUpperCase()} ${tx.amount} ETB - ${tx.name}`);
+  };
+
+  const handleDeleteTransaction = (id: string) => {
+    setTransactions((prev) => removeTransactionById(prev, id));
+    appendLog('TX_DELETED', 'SETTINGS', `Removed transaction ${id}`);
+  };
+
+  const handleClearTransactions = () => {
+    setTransactions([]);
+    appendLog('TX_CLEARED', 'SETTINGS', 'Cleared all stored transactions');
+  };
+
+  const handleResetDefaults = () => {
+    setUserName('Seid Mohammed Jemal');
+    setAccountName('Wadiah Ordinary');
+    setAccountNumber('1000758204567');
+    setBalance(9791.01);
+    setSecondaryAccount(DEFAULT_SECONDARY_ACCOUNT);
+    setActiveAccountIndex(0);
+    setCurrentPin(DEFAULT_AUTH_PIN);
+    setPinLength(4);
+    setRecipientsList(INITIAL_RECIPIENTS);
+    setTransactions(INITIAL_TRANSACTIONS);
+    setDeveloperSettings(DEFAULT_DEVELOPER_SETTINGS);
+    setIsBalanceMasked(DEFAULT_DEVELOPER_SETTINGS.defaultBalanceMasked);
+    setActivityLogs([createActivityLog('FACTORY_RESET', 'SYSTEM', 'Restored all app defaults')]);
   };
 
   return (
     <PhoneFrame activeScreen={currentScreen}>
-      {/* Screen Router */}
       {!isAuthenticated ? (
         <LoginScreen
           onLoginSuccess={handleLoginSuccess}
@@ -413,12 +551,13 @@ export default function App() {
           onToggleLanguage={handleToggleLanguage}
           correctPin={currentPin}
           pinLength={pinLength}
+          biometricsEnabled={developerSettings.biometricsEnabled}
         />
       ) : (
         <div className="flex-1 flex flex-col relative overflow-hidden select-none bg-[#F7F7F9]">
           {currentScreen === 'home' && (
             <HomeScreen
-              balance={balance}
+              balance={activeAccount.balance}
               isBalanceMasked={isBalanceMasked}
               onToggleMask={() => setIsBalanceMasked(!isBalanceMasked)}
               onNavigate={(screen) => {
@@ -426,8 +565,13 @@ export default function App() {
                 if (screen === 'transactions') setActiveBottomTab('transactions');
               }}
               userName={userName}
-              accountName={accountName}
-              accountNumber={accountNumber}
+              accountName={activeAccount.accountName}
+              accountNumber={activeAccount.accountNumber}
+              lastUpdated={cardTimestamp}
+              showCardWorldMap={developerSettings.showCardWorldMap}
+              cardIndex={activeAccountIndex}
+              totalCards={accountsList.length}
+              onSelectCardIndex={setActiveAccountIndex}
               language={language}
               onToggleLanguage={handleToggleLanguage}
               onOpenGovernmentServices={() => setIsGovernmentModalOpen(true)}
@@ -449,16 +593,19 @@ export default function App() {
 
           {currentScreen === 'transactions' && (
             <TransactionsScreen
-              balance={balance}
+              balance={activeAccount.balance}
               isBalanceMasked={isBalanceMasked}
               onToggleMask={() => setIsBalanceMasked(!isBalanceMasked)}
               transactions={transactions}
-              onSelectTransaction={(tx) => {
-                setActiveDetailTx(tx);
-              }}
+              onSelectTransaction={(tx) => setActiveDetailTx(tx)}
               userName={userName}
-              accountName={accountName}
-              accountNumber={accountNumber}
+              accountName={activeAccount.accountName}
+              accountNumber={activeAccount.accountNumber}
+              lastUpdated={cardTimestamp}
+              showCardWorldMap={developerSettings.showCardWorldMap}
+              cardIndex={activeAccountIndex}
+              totalCards={accountsList.length}
+              onSelectCardIndex={setActiveAccountIndex}
               language={language}
               onToggleLanguage={handleToggleLanguage}
               onCopyAccount={handleCopyAccount}
@@ -472,13 +619,17 @@ export default function App() {
             <TransferScreen
               onBack={() => setCurrentScreen('home')}
               onInitiateTransfer={handleInitiateTransfer}
-              currentBalance={balance}
+              currentBalance={activeAccount.balance}
               userName={userName}
-              accountName={accountName}
-              accountNumber={accountNumber}
+              accountName={activeAccount.accountName}
+              accountNumber={activeAccount.accountNumber}
               recipientsList={recipientsList}
               onDeleteRecipient={handleDeleteRecipient}
               isProcessingTransfer={isProcessingTransfer}
+              onOpenScanQr={() => setIsScanQrModalOpen(true)}
+              accounts={accountsList}
+              activeAccountIndex={activeAccountIndex}
+              onSelectAccountIndex={setActiveAccountIndex}
             />
           )}
 
@@ -486,8 +637,12 @@ export default function App() {
             <ReceiptScreen
               transaction={activeReceiptTx}
               senderName={userName}
-              senderAccount={accountNumber}
-              remainingBalance={activeReceiptTx.balanceAfter !== undefined ? activeReceiptTx.balanceAfter : balance}
+              senderAccount={activeAccount.accountNumber}
+              remainingBalance={
+                activeReceiptTx.balanceAfter !== undefined
+                  ? activeReceiptTx.balanceAfter
+                  : activeAccount.balance
+              }
               onClose={() => {
                 setCurrentScreen('transactions');
                 setActiveBottomTab('transactions');
@@ -495,7 +650,6 @@ export default function App() {
             />
           )}
 
-          {/* Bottom Navigation Bar: White background, #ECECEF border, #7B1FA2 active icon, #F3EBDD active pill */}
           {currentScreen !== 'receipt' && (
             <nav className="absolute bottom-0 left-0 right-0 h-[58px] phone:h-[64px] pb-[env(safe-area-inset-bottom,0px)] bg-white border-t border-[#ECECEF] shadow-[0_-2px_10px_rgba(0,0,0,0.02)] flex items-center justify-around z-20 shrink-0">
               <div className="w-full max-w-[500px] mx-auto flex items-center justify-around">
@@ -568,7 +722,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Transaction Detail Bottom Sheet (IMG_20261106_230128_152_4cbf5aa2.jpg) */}
       <TransactionDetailModal
         isOpen={Boolean(activeDetailTx)}
         onClose={() => setActiveDetailTx(null)}
@@ -580,7 +733,6 @@ export default function App() {
         }}
       />
 
-      {/* Confirmation Bottom Sheet (IMG_20261106_230128_091_80078464.jpg) */}
       {pendingTransfer && (
         <ConfirmModal
           isOpen={isConfirmModalOpen}
@@ -589,12 +741,12 @@ export default function App() {
           recipient={pendingTransfer.recipient}
           amount={pendingTransfer.amount}
           senderName={userName}
-          senderAccount={accountNumber}
-          senderBalance={balance}
+          senderAccount={activeAccount.accountNumber}
+          senderBalance={activeAccount.balance}
+          applyStandardFees={developerSettings.applyStandardFees}
         />
       )}
 
-      {/* PIN Keypad Modal */}
       <PinModal
         isOpen={isPinModalOpen}
         onClose={() => setIsPinModalOpen(false)}
@@ -603,47 +755,51 @@ export default function App() {
         pinLength={pinLength}
       />
 
-      {/* Receive Money QR Modal */}
       <ReceiveModal
         isOpen={isReceiveModalOpen}
         onClose={() => setIsReceiveModalOpen(false)}
-        accountNumber={accountNumber}
-        accountName={accountName}
+        accountNumber={activeAccount.accountNumber}
+        accountName={activeAccount.accountName}
         userName={userName}
       />
 
-      {/* Scan QR Modal */}
       <ScanQrModal
         isOpen={isScanQrModalOpen}
         onClose={() => setIsScanQrModalOpen(false)}
-        onScanSuccess={(recipient) => {
+        onScanSuccess={() => {
           setIsScanQrModalOpen(false);
           setCurrentScreen('transfer');
         }}
       />
 
-      {/* Government Services Modal */}
       <GovernmentServicesModal
         isOpen={isGovernmentModalOpen}
         onClose={() => setIsGovernmentModalOpen(false)}
-        onSelectService={() => {
+        onSelectService={(svc) => {
           setIsGovernmentModalOpen(false);
+          appendLog('GOV_SERVICE', 'SYSTEM', `Opened ${svc}`);
         }}
       />
 
-      {/* Settings Modal (Name, Account, Balance, Hidden PIN Change, Saved Beneficiaries) */}
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         userName={userName}
-        onUpdateUserName={(name) => setUserName(name)}
+        onUpdateUserName={(name) => {
+          setUserName(name);
+          appendLog('PROFILE_UPDATED', 'SETTINGS', `Updated name to ${name}`);
+        }}
         balance={balance}
-        onUpdateBalance={(newBal) => setBalance(newBal)}
+        onUpdateBalance={(newBal) => {
+          setBalance(newBal);
+          appendLog('BALANCE_UPDATED', 'SETTINGS', `Updated balance to ${newBal} ETB`);
+        }}
         accountName={accountName}
         accountNumber={accountNumber}
         onUpdateAccount={(name, num) => {
           setAccountName(name);
           setAccountNumber(num);
+          appendLog('ACCOUNT_UPDATED', 'SETTINGS', `${name} (${num})`);
         }}
         language={language}
         onToggleLanguage={handleToggleLanguage}
@@ -652,21 +808,37 @@ export default function App() {
         onChangePin={(newPin, length) => {
           setCurrentPin(newPin);
           setPinLength(length);
+          appendLog('PIN_CHANGED', 'SECURITY', `Changed PIN (${length} digits)`);
         }}
         pinLength={pinLength}
         recipientsList={recipientsList}
         onAddRecipient={handleAddRecipient}
         onDeleteRecipient={handleDeleteRecipient}
+        transactions={transactions}
+        onAddTransaction={handleAddCustomTransaction}
+        onDeleteTransaction={handleDeleteTransaction}
+        onClearTransactions={handleClearTransactions}
+        developerSettings={developerSettings}
+        onUpdateDeveloperSettings={(next) => {
+          setDeveloperSettings(next);
+          appendLog('DEV_SETTINGS_UPDATED', 'SETTINGS', 'Updated developer runtime flags');
+        }}
+        secondaryAccount={secondaryAccount}
+        onUpdateSecondaryAccount={(next) => {
+          setSecondaryAccount(next);
+          appendLog('SECONDARY_ACCOUNT_UPDATED', 'SETTINGS', `${next.accountName} (${next.accountNumber})`);
+        }}
+        activityLogs={activityLogs}
+        onResetDefaults={handleResetDefaults}
       />
 
-      {/* Account Balance & Downward Details Modal */}
       <AccountBalanceModal
         isOpen={isBalanceModalOpen}
         onClose={() => setIsBalanceModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         userName={userName}
-        accountName={accountName}
-        accountNumber={accountNumber}
+        accountName={activeAccount.accountName}
+        accountNumber={activeAccount.accountNumber}
         onNavigateToTransactions={() => {
           setIsBalanceModalOpen(false);
           setCurrentScreen('transactions');
@@ -678,11 +850,10 @@ export default function App() {
         }}
       />
 
-      {/* Airtime & Packages Modal */}
       <AirtimeModal
         isOpen={isAirtimeModalOpen}
         onClose={() => setIsAirtimeModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         onSuccessRecharge={(amount, phone, provider, packageType) => {
           recordNewTransaction(
             `${provider} Top-Up`,
@@ -694,11 +865,10 @@ export default function App() {
         }}
       />
 
-      {/* CBE Birr Wallet Services Modal */}
       <CbeBirrModal
         isOpen={isCbeBirrModalOpen}
         onClose={() => setIsCbeBirrModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         onSuccessTransfer={(amount, phone, recipientName, serviceType) => {
           recordNewTransaction(
             recipientName,
@@ -710,11 +880,10 @@ export default function App() {
         }}
       />
 
-      {/* Banking Services Modal */}
       <BankingServicesModal
         isOpen={isBankingModalOpen}
         onClose={() => setIsBankingModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         onNavigateToTransactions={() => {
           setIsBankingModalOpen(false);
           setCurrentScreen('transactions');
@@ -722,11 +891,10 @@ export default function App() {
         }}
       />
 
-      {/* Pay Merchant Modal */}
       <PayMerchantModal
         isOpen={isPayMerchantModalOpen}
         onClose={() => setIsPayMerchantModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         onSuccessPayMerchant={(amount, merchantName, tillNumber) => {
           recordNewTransaction(
             merchantName,
@@ -738,11 +906,10 @@ export default function App() {
         }}
       />
 
-      {/* Travel & Transport Modal */}
       <TravelModal
         isOpen={isTravelModalOpen}
         onClose={() => setIsTravelModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         onSuccessPayTravel={(amount, serviceName, bookingRef) => {
           recordNewTransaction(
             serviceName,
@@ -754,11 +921,10 @@ export default function App() {
         }}
       />
 
-      {/* Shopping & Retail Modal */}
       <ShoppingModal
         isOpen={isShoppingModalOpen}
         onClose={() => setIsShoppingModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         onSuccessPayShopping={(amount, storeName, orderNumber) => {
           recordNewTransaction(
             storeName,
@@ -770,11 +936,10 @@ export default function App() {
         }}
       />
 
-      {/* Entertainment & Tickets Modal */}
       <EntertainmentModal
         isOpen={isEntertainmentModalOpen}
         onClose={() => setIsEntertainmentModalOpen(false)}
-        balance={balance}
+        balance={activeAccount.balance}
         onSuccessPayEntertainment={(amount, eventName, ticketCount) => {
           recordNewTransaction(
             eventName,

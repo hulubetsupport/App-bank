@@ -3,11 +3,15 @@ import assert from 'node:assert/strict';
 import {
   validatePassword,
   formatETB,
+  formatCardTimestamp,
+  formatTransactionDate,
   maskAccountNumber,
   searchRecipients,
   calculateCharges,
   generateTransactionId,
   generateReceiptId,
+  createCustomTransaction,
+  removeTransactionById,
   createActivityLog,
   INITIAL_RECIPIENTS,
 } from './banking.ts';
@@ -27,19 +31,28 @@ test('formatETB correctly formats amounts with 2 decimals and commas', () => {
   assert.equal(formatETB(850), '850.00');
 });
 
+test('formatCardTimestamp and formatTransactionDate produce authentic CBE date formats', () => {
+  const sampleDate = new Date(2026, 10, 6, 22, 52, 0);
+  const cardStamp = formatCardTimestamp(sampleDate);
+  assert.match(cardStamp, /^06 Nov 2026 • 10:52\s?PM$/i);
+
+  const txStamp = formatTransactionDate(sampleDate);
+  assert.match(txStamp, /^06-Nov-26 10:52\s?PM$/i);
+});
+
 test('maskAccountNumber obscures middle digits in authentic CBE style', () => {
-  assert.equal(maskAccountNumber('1000562339427'), '1*********9427');
-  assert.equal(maskAccountNumber('1000382106157'), '1*********6157');
+  assert.equal(maskAccountNumber('1000758204567'), '1*********4567');
+  assert.equal(maskAccountNumber('1000614289312'), '1*********9312');
 });
 
 test('searchRecipients searches by name, account number and initials', () => {
-  const resultByName = searchRecipients('bilal', INITIAL_RECIPIENTS);
+  const resultByName = searchRecipients('dawit', INITIAL_RECIPIENTS);
   assert.equal(resultByName.length, 1);
-  assert.equal(resultByName[0].name, 'Bilal Seid Abdu');
+  assert.equal(resultByName[0].name, 'Dawit Bekele Tadesse');
 
-  const resultByAcc = searchRecipients('7314', INITIAL_RECIPIENTS);
+  const resultByAcc = searchRecipients('6208', INITIAL_RECIPIENTS);
   assert.equal(resultByAcc.length, 1);
-  assert.equal(resultByAcc[0].name, 'Tsegaye Abebe Berihun');
+  assert.equal(resultByAcc[0].name, 'Yohannes Girma Tesfaye');
 });
 
 test('generateTransactionId and generateReceiptId produce authentic CBE formats', () => {
@@ -57,11 +70,41 @@ test('createActivityLog produces valid structured audit logs', () => {
   assert.equal(log.status, 'SUCCESS');
 });
 
-test('calculateCharges returns zero fees matching CBE standard mobile transfers', () => {
-  const charges = calculateCharges(1000);
-  assert.equal(charges.serviceCharge, 0);
-  assert.equal(charges.vat, 0);
-  assert.equal(charges.disasterRecovery, 0);
-  assert.equal(charges.totalDebited, 1000);
+test('calculateCharges supports zero fees and optional standard CBE fee tier', () => {
+  const zeroFees = calculateCharges(1000);
+  assert.equal(zeroFees.serviceCharge, 0);
+  assert.equal(zeroFees.vat, 0);
+  assert.equal(zeroFees.disasterRecovery, 0);
+  assert.equal(zeroFees.totalDebited, 1000);
+
+  const withFees = calculateCharges(5000, true);
+  assert.equal(withFees.serviceCharge, 10);
+  assert.equal(withFees.vat, 1.5);
+  assert.equal(withFees.disasterRecovery, 0.5);
+  assert.equal(withFees.totalDebited, 5012);
 });
+
+test('createCustomTransaction and removeTransactionById manage transaction records cleanly', () => {
+  const tx = createCustomTransaction({
+    name: 'Telebirr Wallet',
+    amount: 4980,
+    type: 'debited',
+    category: 'TRANSFER TO TELEBIRR',
+    accountNumber: '+251996910607',
+    remark: 'Transfer to Telebirr',
+    serviceCharge: 10,
+    vat: 1.5,
+    disasterRecovery: 0.5,
+  });
+
+  assert.equal(tx.name, 'Telebirr Wallet');
+  assert.equal(tx.amount, 4980);
+  assert.equal(tx.type, 'debited');
+  assert.equal(tx.serviceCharge, 10);
+  assert.match(tx.referenceId, /^FT26311[0-9A-Z]{5}$/);
+
+  const remaining = removeTransactionById([tx], tx.id);
+  assert.equal(remaining.length, 0);
+});
+
 
