@@ -8,7 +8,7 @@ import {
   Scan,
 } from 'lucide-react';
 import { Transaction } from '../types/index.ts';
-import { formatETB } from '../utils/banking.ts';
+import { formatETB, formatReceiptDate } from '../utils/banking.ts';
 import cbeLogo from '../assets/cbe-logo.png';
 import QRCode from 'qrcode';
 
@@ -138,61 +138,61 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
       </div>
 
       {/* Overlapping Curved White Sheet + Centered Checkmark Badge */}
-      <div className="relative -mt-6 bg-white rounded-t-[28px] px-4.5 phone:px-6 pt-12 phone:pt-14 pb-6 flex-1 flex flex-col items-center max-w-[500px] mx-auto w-full">
+      <div className="relative -mt-6 bg-white rounded-t-[28px] px-4.5 phone:px-5.5 pt-11 phone:pt-12 pb-6 flex-1 flex flex-col items-center max-w-[500px] mx-auto w-full">
         {/* Circular Success Checkmark straddling purple/white edge */}
-        <div className="absolute -top-9 phone:-top-10 left-1/2 -translate-x-1/2 w-18 h-18 phone:w-20 phone:h-20 rounded-full bg-white shadow-md flex items-center justify-center p-1.5 z-10">
+        <div className="absolute -top-9 phone:-top-10 left-1/2 -translate-x-1/2 w-[72px] h-[72px] phone:w-[78px] phone:h-[78px] rounded-full bg-white shadow-md flex items-center justify-center p-1 z-10">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-[#76169B] to-[#941FAE] flex items-center justify-center text-white shadow-inner">
             <Check className="w-9 h-9 phone:w-10 phone:h-10 stroke-[3.5]" />
           </div>
         </div>
 
-        <h3 className="text-[14px] phone:text-[15.5px] font-medium text-[#29212E] text-center mb-4">
+        <h3 className="text-[12.5px] phone:text-[13.5px] font-normal text-[#33333A] text-center mb-3.5">
           Transaction Completed Successfully!
         </h3>
 
         {/* Transaction Summary Card */}
-        <div className="w-full bg-[#F3F3F5] border border-[#E8E8EC] rounded-[20px] phone:rounded-[24px] p-4.5 phone:p-5.5 text-[#29212E] shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
-          <div className="text-[11.5px] phone:text-[12.5px] font-normal text-[#8E8B94] mb-2.5">
+        <div className="w-full bg-[#EFEFEF] border border-[#E5E5E8] rounded-[18px] phone:rounded-[20px] px-4.5 py-4 phone:px-5 phone:py-4.5 text-[#1F1F24] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+          <div className="text-[11.5px] phone:text-[12px] font-normal text-[#7E7B84] mb-2">
             Transaction Summary
           </div>
 
-          <p className="text-[13px] phone:text-[14px] leading-relaxed text-[#29212E] font-normal">
+          <p className="text-[13.5px] phone:text-[14.5px] leading-[1.42] text-[#1F1F24] font-normal">
             ETB{' '}
-            <strong className="text-[#29212E] font-bold tabular-nums">
+            <strong className="text-[#18181C] font-bold tabular-nums">
               {formatETB(transaction.amount)}
             </strong>{' '}
             has been {transaction.type === 'credited' ? 'credited to' : 'debited from'}{' '}
-            <strong className="text-[#29212E] font-bold">{senderName}</strong> ETB-{senderLast4}{' '}
+            <strong className="text-[#18181C] font-bold">{senderName}</strong> ETB-{senderLast4}{' '}
             {transaction.type === 'credited' ? 'from' : 'for'}{' '}
-            <strong className="text-[#29212E] font-bold">{transaction.name}</strong>{' '}
+            <strong className="text-[#18181C] font-bold">{transaction.name}</strong>{' '}
             <span>ETB-{shortAcc}</span> on{' '}
-            <strong className="text-[#29212E] font-bold">{transaction.date}</strong> with
-            transaction ID:{' '}
-            <strong className="text-[#29212E] font-bold font-mono">
-              {transaction.referenceId}
-            </strong>
-            . Reason:{' '}
-            <span className="font-medium text-[#29212E]">{transaction.remark || 'MB Transfer'}</span>
+            <strong className="text-[#18181C] font-bold">
+              {formatReceiptDate(transaction.date)}
+            </strong>{' '}
+            with transaction ID:{' '}
+            <strong className="text-[#18181C] font-bold">{transaction.referenceId}</strong>. Reason:{' '}
+            <span>{transaction.remark || 'MB Transfer'}</span>
           </p>
 
-          <div className="mt-2.5 text-[12px] phone:text-[13px] leading-relaxed text-[#3E3A43]">
+          <p className="mt-1 text-[13.5px] phone:text-[14.5px] leading-[1.42] text-[#1F1F24] font-normal">
             Total Amount {transaction.type === 'credited' ? 'Credited' : 'Debited'}: ETB
-            <span className="tabular-nums">{formatETB(totalDebited)}</span> with Service Charge of
-            ETB{formatETB(serviceCharge)}, VAT (15%) of {vat === 0 ? '0.0' : `ETB${formatETB(vat)}`}{' '}
-            and Disaster Recovery (5%) of ETB{formatETB(disasterRecovery)}.
-          </div>
+            <span className="tabular-nums">{totalDebited.toFixed(2)}</span> with Service Charge of
+            ETB{serviceCharge.toFixed(2)}, VAT (15%) of{' '}
+            {vat === 0 ? '0.0' : `ETB${vat.toFixed(2)}`} and Disaster Recovery (5%) of ETB
+            {disasterRecovery.toFixed(2)}.
+          </p>
 
-          {/* Centered QR Code inside crisp dark-bordered rounded square */}
-          <div className="flex justify-center my-4 phone:my-5">
-            <div className="bg-white p-2 phone:p-2.5 rounded-2xl border-2 border-[#3E3A43]/60 shadow-2xs">
+          {/* Compact Centered QR Code matching real CBE Receipt proportions */}
+          <div className="flex justify-center my-3.5 phone:my-4">
+            <div className="bg-white p-1 rounded-[12px] border-[1.5px] border-[#524F58] shadow-2xs">
               {qrDataUrl ? (
                 <img
                   src={qrDataUrl}
                   alt="Receipt QR Code"
-                  className="w-32 h-32 phone:w-40 phone:h-40 object-contain"
+                  className="w-[104px] h-[104px] phone:w-[114px] phone:h-[114px] object-contain"
                 />
               ) : (
-                <div className="w-32 h-32 phone:w-40 phone:h-40 flex items-center justify-center bg-neutral-100 rounded text-neutral-400 text-xs">
+                <div className="w-[104px] h-[104px] phone:w-[114px] phone:h-[114px] flex items-center justify-center bg-neutral-100 rounded text-neutral-400 text-[10px]">
                   Generating QR...
                 </div>
               )}
@@ -200,8 +200,8 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
           </div>
 
           {/* Standalone Gold CBE Emblem + Bank Title/Tagline */}
-          <div className="pt-2 flex items-center gap-3">
-            <div className="w-11 h-11 phone:w-12 phone:h-12 shrink-0 flex items-center justify-center">
+          <div className="pt-1 flex items-center gap-3">
+            <div className="w-11 h-11 phone:w-[52px] phone:h-[52px] shrink-0 flex items-center justify-center">
               <img
                 src={cbeLogo}
                 alt="Commercial Bank of Ethiopia"
@@ -212,10 +212,10 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
               />
             </div>
             <div>
-              <h4 className="text-[13px] phone:text-[14px] font-bold text-[#29212E] leading-tight">
+              <h4 className="text-[13.5px] phone:text-[15px] font-bold text-[#2B2B30] leading-tight">
                 Commercial Bank of Ethiopia
               </h4>
-              <p className="text-[10.5px] phone:text-[11.5px] text-[#8E8B94] font-normal">
+              <p className="text-[11.5px] phone:text-[13px] text-[#6B6A72] font-normal mt-0.5">
                 The bank you can always rely on!
               </p>
             </div>

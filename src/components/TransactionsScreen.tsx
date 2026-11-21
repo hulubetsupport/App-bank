@@ -174,47 +174,59 @@ export const TransactionsScreen: React.FC<TransactionsScreenProps> = ({
             </div>
           )}
 
-          {/* Filter Section: All | Debited | Credited */}
-          <div className="flex items-center justify-between border-b border-[#ECECEF] pb-2 mb-3 px-1">
-            <div className="flex items-center gap-6 phone:gap-8 text-[13.5px] phone:text-[15px]">
-              <button
-                onClick={() => setFilter('all')}
-                className={`relative py-1 transition ${
-                  filter === 'all'
-                    ? 'text-[#29212E] font-bold after:absolute after:bottom-[-9px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7B1FA2] after:rounded-full'
-                    : 'text-[#8E8B94] font-medium hover:text-[#29212E]'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilter('debited')}
-                className={`relative py-1 transition ${
-                  filter === 'debited'
-                    ? 'text-[#29212E] font-bold after:absolute after:bottom-[-9px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7B1FA2] after:rounded-full'
-                    : 'text-[#8E8B94] font-medium hover:text-[#29212E]'
-                }`}
-              >
-                Debited
-              </button>
-              <button
-                onClick={() => setFilter('credited')}
-                className={`relative py-1 transition ${
-                  filter === 'credited'
-                    ? 'text-[#29212E] font-bold after:absolute after:bottom-[-9px] after:left-0 after:right-0 after:h-[2.5px] after:bg-[#7B1FA2] after:rounded-full'
-                    : 'text-[#8E8B94] font-medium hover:text-[#29212E]'
-                }`}
-              >
-                Credited
-              </button>
+          {/* Filter Section: All (left) | Debited (middle) | Credited (right) + Search */}
+          <div className="flex items-center justify-between pb-2.5 mb-2.5 px-2 phone:px-3">
+            <div className="flex-1 grid grid-cols-3 items-center pr-3 phone:pr-4 text-[13.5px] phone:text-[15px]">
+              <div className="flex justify-start">
+                <button
+                  type="button"
+                  onClick={() => setFilter('all')}
+                  className={`relative py-1 transition ${
+                    filter === 'all'
+                      ? 'text-[#29212E] font-bold after:absolute after:bottom-[-3px] after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-[2.5px] after:bg-[#5E287E] after:rounded-full'
+                      : 'text-[#6E6A73] font-medium hover:text-[#29212E]'
+                  }`}
+                >
+                  All
+                </button>
+              </div>
+
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setFilter('debited')}
+                  className={`relative py-1 transition ${
+                    filter === 'debited'
+                      ? 'text-[#29212E] font-bold after:absolute after:bottom-[-3px] after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-[2.5px] after:bg-[#5E287E] after:rounded-full'
+                      : 'text-[#6E6A73] font-medium hover:text-[#29212E]'
+                  }`}
+                >
+                  Debited
+                </button>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setFilter('credited')}
+                  className={`relative py-1 transition ${
+                    filter === 'credited'
+                      ? 'text-[#29212E] font-bold after:absolute after:bottom-[-3px] after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-[2.5px] after:bg-[#5E287E] after:rounded-full'
+                      : 'text-[#6E6A73] font-medium hover:text-[#29212E]'
+                  }`}
+                >
+                  Credited
+                </button>
+              </div>
             </div>
 
             <button
+              type="button"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-1.5 text-[#8E8B94] hover:text-[#7B1FA2] transition active:scale-90"
+              className="p-1.5 text-[#5D5A63] hover:text-[#7B1FA2] transition active:scale-90 shrink-0"
               aria-label="Search filter"
             >
-              <Search className="w-4.5 h-4.5" />
+              <Search className="w-4.5 h-4.5 stroke-[2.1]" />
             </button>
           </div>
 

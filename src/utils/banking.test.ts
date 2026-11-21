@@ -5,6 +5,7 @@ import {
   formatETB,
   formatCardTimestamp,
   formatTransactionDate,
+  formatReceiptDate,
   maskAccountNumber,
   searchRecipients,
   calculateCharges,
@@ -31,13 +32,17 @@ test('formatETB correctly formats amounts with 2 decimals and commas', () => {
   assert.equal(formatETB(850), '850.00');
 });
 
-test('formatCardTimestamp and formatTransactionDate produce authentic CBE date formats', () => {
+test('formatCardTimestamp, formatTransactionDate, and formatReceiptDate produce authentic CBE date formats', () => {
   const sampleDate = new Date(2026, 10, 6, 22, 52, 0);
   const cardStamp = formatCardTimestamp(sampleDate);
   assert.match(cardStamp, /^06 Nov 2026 • 10:52\s?PM$/i);
 
   const txStamp = formatTransactionDate(sampleDate);
   assert.match(txStamp, /^06-Nov-26 10:52\s?PM$/i);
+
+  assert.equal(formatReceiptDate('06-Nov-26 10:54 PM'), 'Nov 06, 2026 10:54 PM');
+  assert.equal(formatReceiptDate('20-Nov-2026 04:00 PM'), 'Nov 20, 2026 04:00 PM');
+  assert.equal(formatReceiptDate('Nov 20, 2026 04:00 PM'), 'Nov 20, 2026 04:00 PM');
 });
 
 test('maskAccountNumber obscures middle digits in authentic CBE style', () => {

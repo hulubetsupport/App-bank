@@ -159,12 +159,35 @@ export const TransferScreen: React.FC<TransferScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col bg-[#F7F7F9] overflow-hidden select-none relative w-full h-full">
-      {/* 360° Purple Circular Rotating Loader during payment processing */}
+      {/* 360° Purple Sweep-Gradient Circular Loader during payment processing */}
       {isProcessingTransfer && (
-        <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center select-none">
-          <div className="relative w-20 h-20 flex items-center justify-center">
-            <div className="w-18 h-18 rounded-full border-[5px] border-purple-200/20"></div>
-            <div className="absolute w-18 h-18 rounded-full border-[5px] border-transparent border-t-[#8D24AA] border-r-[#7B1FA2] animate-spin"></div>
+        <div
+          role="status"
+          aria-label="Processing transfer"
+          className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center select-none"
+        >
+          <div className="relative w-[78px] h-[78px] phone:w-[86px] phone:h-[86px] flex items-center justify-center">
+            {/* Full Light-Gray Circular Track */}
+            <div className="absolute inset-0 rounded-full border-[7px] border-[#E0DFE5]/95" />
+
+            {/* Rotating Lavender-to-Deep-Purple Sweep Arc with Rounded Leading Tip */}
+            <div className="absolute inset-0 animate-[spin_0.9s_linear_infinite]">
+              <div
+                className="w-full h-full rounded-full"
+                style={{
+                  background:
+                    'conic-gradient(from 0deg, transparent 0deg 195deg, rgba(176, 128, 212, 0.25) 218deg, rgba(147, 74, 192, 0.65) 265deg, #7E29AB 318deg, #6B1B94 358deg, #6B1B94 360deg)',
+                  WebkitMaskImage:
+                    'radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6.5px))',
+                  maskImage:
+                    'radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6.5px))',
+                }}
+              />
+              <span
+                aria-hidden="true"
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-[7px] h-[7px] rounded-full bg-[radial-gradient(circle_at_38%_35%,#B26CD6_0%,#6B1B94_75%)]"
+              />
+            </div>
           </div>
         </div>
       )}

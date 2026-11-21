@@ -53,6 +53,17 @@ export function formatTransactionDate(date: Date = new Date()): string {
   return `${day}-${month}-${year} ${timeStr}`;
 }
 
+export function formatReceiptDate(dateStr: string): string {
+  const clean = (dateStr || '').trim();
+  const match = clean.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})\s+(.+)$/);
+  if (!match) return clean;
+  const day = match[1].padStart(2, '0');
+  const month = match[2];
+  const fullYear = match[3].length === 2 ? `20${match[3]}` : match[3];
+  const timePart = match[4];
+  return `${month} ${day}, ${fullYear} ${timePart}`;
+}
+
 export function maskAccountNumber(acc: string): string {
   if (!acc || acc.length < 5) return acc;
   const first = acc.charAt(0);
