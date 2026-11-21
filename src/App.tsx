@@ -543,7 +543,7 @@ export default function App() {
   };
 
   return (
-    <PhoneFrame activeScreen={currentScreen}>
+    <PhoneFrame activeScreen={!isAuthenticated ? 'login' : currentScreen}>
       {!isAuthenticated ? (
         <LoginScreen
           onLoginSuccess={handleLoginSuccess}

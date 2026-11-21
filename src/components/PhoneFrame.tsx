@@ -11,11 +11,12 @@ interface PhoneFrameProps {
 export const PhoneFrame: React.FC<PhoneFrameProps> = ({ children, activeScreen }) => {
   useEffect(() => {
     // Configure real native Android status bar with @capacitor/status-bar
+    // Note: Style.Dark = light/white icons for dark/purple backgrounds; Style.Light = dark icons for light backgrounds.
     if (Capacitor.isNativePlatform()) {
       const isPurpleScreen = activeScreen !== 'login';
-      StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
-      StatusBar.setBackgroundColor({ color: isPurpleScreen ? '#7B1FA2' : '#FFFFFF' }).catch(() => {});
-      StatusBar.setStyle({ style: isPurpleScreen ? Style.Light : Style.Dark }).catch(() => {});
+      StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {});
+      StatusBar.setBackgroundColor({ color: isPurpleScreen ? '#7B1FA2' : '#F5F6F8' }).catch(() => {});
+      StatusBar.setStyle({ style: isPurpleScreen ? Style.Dark : Style.Light }).catch(() => {});
     }
   }, [activeScreen]);
 

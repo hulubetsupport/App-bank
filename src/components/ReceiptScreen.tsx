@@ -4,7 +4,7 @@ import {
   Check,
   Share2,
   Receipt as ReceiptIcon,
-  Maximize2,
+  Focus,
   Scan,
 } from 'lucide-react';
 import { Transaction } from '../types/index.ts';
@@ -222,47 +222,50 @@ export const ReceiptScreen: React.FC<ReceiptScreenProps> = ({
           </div>
         </div>
 
-        {actionToast && (
-          <div className="mt-3 px-4 py-1.5 rounded-full bg-[#29212E] text-white text-xs font-medium animate-in fade-in">
-            {actionToast}
+        {/* Bottom-Anchored Actions Row + Close Pill matching real CBE Receipt */}
+        <div className="w-full mt-auto pt-6 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
+          {actionToast && (
+            <div className="mb-3 flex justify-center">
+              <div className="px-4 py-1.5 rounded-full bg-[#29212E] text-white text-xs font-medium animate-in fade-in">
+                {actionToast}
+              </div>
+            </div>
+          )}
+
+          <div className="w-full flex items-center justify-around text-[#29212E] px-2">
+            <button
+              onClick={handleDownloadReceipt}
+              className="flex items-center gap-1.5 phone:gap-2 text-xs phone:text-sm font-medium hover:text-[#7B1FA2] transition active:scale-95"
+            >
+              <ReceiptIcon className="w-4 h-4 phone:w-4.5 phone:h-4.5 text-[#29212E]" />
+              <span>Receipt</span>
+            </button>
+
+            <button
+              onClick={handleScreenshot}
+              className="flex items-center gap-1.5 phone:gap-2 text-xs phone:text-sm font-medium hover:text-[#7B1FA2] transition active:scale-95"
+            >
+              <Focus className="w-4 h-4 phone:w-4.5 phone:h-4.5 text-[#29212E]" />
+              <span>Screenshot</span>
+            </button>
+
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 phone:gap-2 text-xs phone:text-sm font-medium hover:text-[#7B1FA2] transition active:scale-95"
+            >
+              <Share2 className="w-4 h-4 phone:w-4.5 phone:h-4.5 text-[#29212E]" />
+              <span>Share</span>
+            </button>
           </div>
-        )}
 
-        {/* Bottom Actions Row: Receipt, Screenshot, Share */}
-        <div className="w-full flex items-center justify-around text-[#29212E] mt-5 phone:mt-6 px-4">
-          <button
-            onClick={handleDownloadReceipt}
-            className="flex items-center gap-1.5 phone:gap-2 text-xs phone:text-sm font-semibold hover:text-[#7B1FA2] transition active:scale-95"
-          >
-            <ReceiptIcon className="w-4 h-4 phone:w-4.5 phone:h-4.5 text-[#29212E]" />
-            <span>Receipt</span>
-          </button>
-
-          <button
-            onClick={handleScreenshot}
-            className="flex items-center gap-1.5 phone:gap-2 text-xs phone:text-sm font-semibold hover:text-[#7B1FA2] transition active:scale-95"
-          >
-            <Maximize2 className="w-4 h-4 phone:w-4.5 phone:h-4.5 text-[#29212E]" />
-            <span>Screenshot</span>
-          </button>
-
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1.5 phone:gap-2 text-xs phone:text-sm font-semibold hover:text-[#7B1FA2] transition active:scale-95"
-          >
-            <Share2 className="w-4 h-4 phone:w-4.5 phone:h-4.5 text-[#29212E]" />
-            <span>Share</span>
-          </button>
-        </div>
-
-        {/* Close Pill Button */}
-        <div className="w-full px-1 mt-4 phone:mt-5 mb-2">
-          <button
-            onClick={onClose}
-            className="w-full h-11 phone:h-12.5 rounded-full bg-[#DCDCE0] hover:bg-[#D1D1D6] active:scale-[0.99] text-[#29212E] font-semibold text-[14px] phone:text-[15.5px] transition shadow-2xs"
-          >
-            Close
-          </button>
+          <div className="w-full px-1 mt-4 phone:mt-4.5">
+            <button
+              onClick={onClose}
+              className="w-full h-11 phone:h-12 rounded-full bg-[#E5E5E9] hover:bg-[#DADAE0] active:scale-[0.99] border border-[#BEBEC6] text-[#29212E] font-medium text-[14px] phone:text-[15px] transition shadow-2xs"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
